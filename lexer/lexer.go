@@ -12,9 +12,10 @@ type Lexer struct {
 	src  io.Reader
 	buff []byte
 
-	pos  int
+	curr int
 	next int
-	line int
+
+	pos token.Position
 
 	char byte
 }
@@ -31,12 +32,15 @@ func WithString(str string) *Lexer {
 }
 
 // Init readers the reader src into a buffer
-func (l *Lexer) Init() {
+func (l *Lexer) Init(filename string) {
 	b, err := ioutil.ReadAll(l.src)
 	if err != nil {
 		panic(err)
 	}
 	l.buff = b
+
+	l.pos.Filename = filename
+	l.pos.Line = 1
 
 	l.nextChar()
 }
@@ -49,50 +53,48 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.char {
 	case '=':
-		tok = token.New(token.Assign, l.char)
+		tok = token.New(token.Assign, l.char, l.pos)
 	case '+':
-		tok = token.New(token.Plus, l.char)
+		tok = token.New(token.Plus, l.char, l.pos)
 	case '-':
-		tok = token.New(token.Minus, l.char)
+		tok = token.New(token.Minus, l.char, l.pos)
 	case '*':
-		tok = token.New(token.Times, l.char)
+		tok = token.New(token.Times, l.char, l.pos)
 	case '/':
-		tok = token.New(token.Divide, l.char)
+		tok = token.New(token.Divide, l.char, l.pos)
 	case '!':
-		tok = token.New(token.Bang, l.char)
+		tok = token.New(token.Bang, l.char, l.pos)
 	case '<':
-		tok = token.New(token.Less, l.char)
+		tok = token.New(token.Less, l.char, l.pos)
 	case '>':
-		tok = token.New(token.Greater, l.char)
+		tok = token.New(token.Greater, l.char, l.pos)
 	case '{':
-		tok = token.New(token.LBrace, l.char)
+		tok = token.New(token.LBrace, l.char, l.pos)
 	case '}':
-		tok = token.New(token.RBrace, l.char)
+		tok = token.New(token.RBrace, l.char, l.pos)
 	case '(':
-		tok = token.New(token.LParen, l.char)
+		tok = token.New(token.LParen, l.char, l.pos)
 	case ')':
-		tok = token.New(token.RParen, l.char)
+		tok = token.New(token.RParen, l.char, l.pos)
 	case '[':
-		tok = token.New(token.LBracket, l.char)
+		tok = token.New(token.LBracket, l.char, l.pos)
 	case ']':
-		tok = token.New(token.RBracket, l.char)
+		tok = token.New(token.RBracket, l.char, l.pos)
 	case '|':
-		tok = token.New(token.Bar, l.char)
+		tok = token.New(token.Bar, l.char, l.pos)
 	case ',':
-		tok = token.New(token.Comma, l.char)
+		tok = token.New(token.Comma, l.char, l.pos)
 	case ';':
-		tok = token.New(token.Terminator, l.char)
+		tok = token.New(token.Terminator, l.char, l.pos)
 	case 0:
-		tok = token.New(token.EOF, l.char)
+		tok = token.New(token.EOF, l.char, l.pos)
 	default:
 		if isLetter(l.char) {
-			tok.Literal, tok.Type = l.readIdentifier()
-			return tok
+			return l.readIdentifier()
 		} else if isDigit(l.char) {
-			tok.Literal, tok.Type = l.readNumber()
-			return tok
+			return l.readNumber()
 		} else {
-			tok = token.New(token.Illegal, l.char)
+			tok = token.New(token.Illegal, l.char, l.pos)
 		}
 	}
 
@@ -115,22 +117,27 @@ func (l *Lexer) consumeWhitespace() {
 	}
 }
 
-func (l *Lexer) readIdentifier() (string, token.Type) {
-	p := l.pos
+func (l *Lexer) readIdentifier() token.Token {
+	pos := l.pos
+
+	p := l.curr
 	for isLetter(l.char) {
 		l.nextChar()
 	}
-	id := string(l.buff[p:l.pos])
-	return id, token.LookupIdenifier(id)
+	id := string(l.buff[p:l.curr])
+
+	return token.Token{token.LookupIdenifier(id), id, pos}
 }
 
 // TODO: make parse double and int
-func (l *Lexer) readNumber() (string, token.Type) {
-	p := l.pos
+func (l *Lexer) readNumber() token.Token {
+	pos := l.pos
+
+	p := l.curr
 	for isDigit(l.char) {
 		l.nextChar()
 	}
-	return string(l.buff[p:l.pos]), token.Int
+	return token.Token{token.Int, string(l.buff[p:l.curr]), pos}
 }
 
 func (l *Lexer) nextChar() {
@@ -138,7 +145,15 @@ func (l *Lexer) nextChar() {
 		l.char = 0
 	} else {
 		l.char = l.buff[l.next]
-		l.pos = l.next
+		l.curr = l.next
 		l.next++
+
+		// update position data
+		l.pos.Col++
+		l.pos.Offset = l.curr
+		if l.char == '\n' {
+			l.pos.Line++
+			l.pos.Col = 0
+		}
 	}
 }

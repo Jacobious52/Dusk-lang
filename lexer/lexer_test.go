@@ -60,10 +60,12 @@ let result = add(five, ten);`
 	}
 
 	l := lexer.WithString(input)
-	l.Init()
+	l.Init("lexer_test.go")
 
 	for i, tt := range tests {
 		tok := l.NextToken()
+
+		t.Logf("%v\t\t%v\n", tok.Literal, tok.Pos)
 
 		if tok.Type != tt.expectedType {
 			t.Fatalf("tests[%d] - Type wrong. expected=%q, got=%q",

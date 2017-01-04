@@ -1,5 +1,7 @@
 package token
 
+import "fmt"
+
 // Type speficies a token type
 type Type int
 
@@ -88,8 +90,8 @@ type Token struct {
 }
 
 // New creates a new token
-func New(t Type, literal byte) Token {
-	return Token{Type: t, Literal: string(literal)}
+func New(t Type, literal byte, pos Position) Token {
+	return Token{t, string(literal), pos}
 }
 
 // LookupLiteral returns string for type
@@ -182,4 +184,9 @@ type Position struct {
 	Offset   int
 	Line     int
 	Col      int
+}
+
+// Stringer method for Position
+func (p Position) String() string {
+	return fmt.Sprint(p.Filename, ":", p.Line, ":", p.Col)
 }
