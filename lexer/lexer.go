@@ -8,15 +8,24 @@ import (
 
 // Lexer performs the tokenisation on a io.Reader
 type Lexer struct {
+	// src input buffer
 	buff []byte
 
+	// current index in buffer
+	// is used to state the current place
 	curr int
+	// next index in buffer
+	// is used to read the next character without affecting curr
 	next int
 
+	// position in the src visually
 	pos token.Position
 
+	// the current character the lexer is looking at
 	char byte
 
+	// the last token lexed
+	// used for inserting semi-colon on line break
 	last token.Type
 }
 
