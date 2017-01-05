@@ -53,7 +53,18 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.char {
 	case '=':
-		tok = token.New(token.Assign, l.char, l.pos)
+		if l.peekChar() == '=' {
+			char := l.char
+			l.nextChar()
+
+			b := make([]byte, 2)
+			b[0] = char
+			b[1] = l.char
+
+			tok = token.Token{Type: token.Equal, Literal: string(b)}
+		} else {
+			tok = token.New(token.Assign, l.char, l.pos)
+		}
 	case '+':
 		tok = token.New(token.Plus, l.char, l.pos)
 	case '-':
@@ -63,7 +74,18 @@ func (l *Lexer) NextToken() token.Token {
 	case '/':
 		tok = token.New(token.Divide, l.char, l.pos)
 	case '!':
-		tok = token.New(token.Bang, l.char, l.pos)
+		if l.peekChar() == '=' {
+			char := l.char
+			l.nextChar()
+
+			b := make([]byte, 2)
+			b[0] = char
+			b[1] = l.char
+
+			tok = token.Token{Type: token.NotEqual, Literal: string(b)}
+		} else {
+			tok = token.New(token.Bang, l.char, l.pos)
+		}
 	case '<':
 		tok = token.New(token.Less, l.char, l.pos)
 	case '>':
@@ -156,4 +178,11 @@ func (l *Lexer) nextChar() {
 			l.pos.Col = 0
 		}
 	}
+}
+
+func (l *Lexer) peekChar() byte {
+	if l.next >= len(l.buff) {
+		return 0
+	}
+	return l.buff[l.next]
 }

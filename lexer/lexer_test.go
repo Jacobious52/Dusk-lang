@@ -15,7 +15,11 @@ let add = |x, y| {
     x + y;
 };
 
-let result = add(five, ten);`
+let result = add(five, ten);
+
+if result == 1;
+if result != 1;
+if !result < 3;`
 
 	tests := []struct {
 		expectedType    token.Type
@@ -56,6 +60,22 @@ let result = add(five, ten);`
 		{token.Identifier, "ten"},
 		{token.RParen, ")"},
 		{token.Terminator, ";"},
+		{token.If, "if"},
+		{token.Identifier, "result"},
+		{token.Equal, "=="},
+		{token.Int, "1"},
+		{token.Terminator, ";"},
+		{token.If, "if"},
+		{token.Identifier, "result"},
+		{token.NotEqual, "!="},
+		{token.Int, "1"},
+		{token.Terminator, ";"},
+		{token.If, "if"},
+		{token.Bang, "!"},
+		{token.Identifier, "result"},
+		{token.Less, "<"},
+		{token.Int, "3"},
+		{token.Terminator, ";"},
 		{token.EOF, string(0)},
 	}
 
@@ -65,15 +85,15 @@ let result = add(five, ten);`
 	for i, tt := range tests {
 		tok := l.NextToken()
 
-		t.Logf("%v\t\t%v\n", tok.Literal, tok.Pos)
+		//t.Logf("%v\t\t%v\n", tok.Literal, tok.Pos)
 
 		if tok.Type != tt.expectedType {
-			t.Fatalf("tests[%d] - Type wrong. expected=%q, got=%q",
+			t.Fatalf("tests[%d] - Type wrong. expected %q, got %q",
 				i, token.LookupLiteral(tt.expectedType), token.LookupLiteral(tok.Type))
 		}
 
 		if tok.Literal != tt.expectedLiteral {
-			t.Fatalf("tests[%d] - Literal wrong. expected=%q, got=%q",
+			t.Fatalf("tests[%d] - Literal wrong. expected %q, got %q",
 				i, tt.expectedLiteral, tok.Literal)
 		}
 	}
