@@ -2,14 +2,17 @@ package repl
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"jacob/black/lexer"
 	"jacob/black/token"
+	"strings"
 )
 
 const (
-	prompt = "> "
+	prompt = "=> "
+	cont   = ".. "
 	intro  = "\033[2J\033[0;0HBlack Programming Langaguge (Repl). © Jacob Gonzalez 2017\n\n"
 )
 
@@ -36,6 +39,7 @@ func Run(in io.Reader, out io.Writer) {
 
 	scanner := bufio.NewScanner(in)
 
+	// Read until EOF
 	for {
 		fmt.Fprint(out, color(prompt, green))
 
@@ -43,7 +47,42 @@ func Run(in io.Reader, out io.Writer) {
 			return
 		}
 
+		// get current line
 		line := scanner.Text()
+
+		// if we open a function or map usinh {
+		// continue reading into a buffer until we reach the maching }
+		// then set this as the whole input
+		if strings.HasSuffix(strings.TrimSpace(line), "{") {
+			var indent int
+			var b bytes.Buffer
+			b.WriteString(line)
+
+			for {
+				fmt.Fprint(out, color(cont, green), strings.Repeat("\t", indent))
+
+				if ok := scanner.Scan(); !ok {
+					return
+				}
+
+				nextLine := scanner.Text()
+				b.WriteString(nextLine)
+
+				trimmed := strings.TrimSpace(nextLine)
+
+				if strings.HasSuffix(trimmed, "}") {
+					indent--
+					if indent < 0 {
+						break
+					}
+				} else if strings.HasSuffix(trimmed, "{") {
+					if !strings.HasPrefix(trimmed, "}") {
+						indent++
+					}
+				}
+			}
+			line = b.String()
+		}
 
 		l := lexer.WithString(line, "repl")
 
