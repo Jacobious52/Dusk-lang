@@ -19,7 +19,8 @@ let result = add(five, ten);
 
 if result == 1;
 if result != 1;
-if !result < 3;`
+if !result < 3;
+let fail = 21`
 
 	tests := []struct {
 		expectedType    token.Type
@@ -76,11 +77,14 @@ if !result < 3;`
 		{token.Less, "<"},
 		{token.Int, "3"},
 		{token.Terminator, ";"},
+		{token.Let, "let"},
+		{token.Identifier, "fail"},
+		{token.Assign, "="},
+		{token.Int, "21"},
 		{token.EOF, string(0)},
 	}
 
-	l := lexer.WithString(input)
-	l.Init("lexer_test.go")
+	l := lexer.WithString(input, "lexer_test.go")
 
 	for i, tt := range tests {
 		tok := l.NextToken()

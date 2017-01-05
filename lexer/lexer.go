@@ -4,12 +4,10 @@ import (
 	"io"
 	"io/ioutil"
 	"jacob/black/token"
-	"strings"
 )
 
 // Lexer performs the tokenisation on a io.Reader
 type Lexer struct {
-	src  io.Reader
 	buff []byte
 
 	curr int
@@ -21,32 +19,35 @@ type Lexer struct {
 }
 
 // WithReader creates a new Lexer from the reader
-func WithReader(reader io.Reader) *Lexer {
-	l := &Lexer{src: reader}
+func WithReader(reader io.Reader, filename string) *Lexer {
+	b, err := ioutil.ReadAll(reader)
+	if err != nil {
+		panic(err)
+	}
+
+	l := &Lexer{buff: b}
+	l.init(filename)
+
 	return l
 }
 
 // WithString creates a new Lexer from a string
-func WithString(str string) *Lexer {
-	return WithReader(strings.NewReader(str))
+func WithString(str, filename string) *Lexer {
+	l := &Lexer{buff: []byte(str)}
+	l.init(filename)
+	return l
 }
 
-// Init readers the reader src into a buffer
-func (l *Lexer) Init(filename string) {
-	b, err := ioutil.ReadAll(l.src)
-	if err != nil {
-		panic(err)
-	}
-	l.buff = b
-
+// init sets the initial positons for the lexer
+func (l *Lexer) init(filename string) {
 	l.pos.Filename = filename
 	l.pos.Line = 1
 
 	l.nextChar()
 }
 
-// NextToken returns the next token in the input stream
-func (l *Lexer) NextToken() token.Token {
+// Next returns the next token in the input stream
+func (l *Lexer) Next() token.Token {
 	var tok token.Token
 
 	l.consumeWhitespace()
@@ -167,17 +168,19 @@ func (l *Lexer) nextChar() {
 		l.char = 0
 	} else {
 		l.char = l.buff[l.next]
-		l.curr = l.next
-		l.next++
-
-		// update position data
-		l.pos.Col++
-		l.pos.Offset = l.curr
-		if l.char == '\n' {
-			l.pos.Line++
-			l.pos.Col = 0
-		}
 	}
+
+	l.curr = l.next
+	l.next++
+
+	// update position data
+	l.pos.Col++
+	l.pos.Offset = l.curr
+	if l.char == '\n' {
+		l.pos.Line++
+		l.pos.Col = 0
+	}
+
 }
 
 func (l *Lexer) peekChar() byte {
