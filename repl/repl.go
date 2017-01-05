@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"jacob/black/check"
 	"jacob/black/lexer"
 	"jacob/black/token"
 	"strings"
@@ -47,6 +48,8 @@ func Run(in io.Reader, out io.Writer) {
 			return
 		}
 
+		checkers := []check.Checker{&check.Balanced{}}
+
 		// get current line
 		line := scanner.Text()
 
@@ -76,6 +79,7 @@ func Run(in io.Reader, out io.Writer) {
 						break
 					}
 				} else if strings.HasSuffix(trimmed, "{") {
+					// for if else case where end on close and start new
 					if !strings.HasPrefix(trimmed, "}") {
 						indent++
 					}
@@ -87,7 +91,19 @@ func Run(in io.Reader, out io.Writer) {
 		l := lexer.WithString(line, "repl")
 
 		for tok := l.Next(); tok.Type != token.EOF; tok = l.Next() {
+			for _, checker := range checkers {
+				if err := checker.Check(tok); err != nil {
+					fmt.Fprintln(out, color("Error", red), color(tok.Pos, cyan), "-", err)
+				}
+			}
 			fmt.Fprintln(out, color("#", magneta), color(tok, yellow))
 		}
+
+		for _, checker := range checkers {
+			if err := checker.Done(); err != nil {
+				fmt.Fprintln(out, color("Error", red), color("repl:EOF", blue), "-", err)
+			}
+		}
+
 	}
 }
