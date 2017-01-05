@@ -8,18 +8,18 @@ import (
 
 func TestNextToken(t *testing.T) {
 
-	input := `let five = 5;
-let ten = 10;
+	input := `let five = 5
+let ten = 10
 
 let add = |x, y| {
-    x + y;
-};
+	x + y
+}
 
-let result = add(five, ten);
+let result = add(five, ten)
 
-if result == 1;
-if result != 1;
-if !result < 3;
+if result == 1
+if result != 1
+if !result < 3
 let fail = 21`
 
 	tests := []struct {
@@ -87,7 +87,7 @@ let fail = 21`
 	l := lexer.WithString(input, "lexer_test.go")
 
 	for i, tt := range tests {
-		tok := l.NextToken()
+		tok := l.Next()
 
 		//t.Logf("%v\t\t%v\n", tok.Literal, tok.Pos)
 

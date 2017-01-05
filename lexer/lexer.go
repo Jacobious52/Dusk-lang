@@ -16,6 +16,8 @@ type Lexer struct {
 	pos token.Position
 
 	char byte
+
+	last token.Type
 }
 
 // WithReader creates a new Lexer from the reader
@@ -123,6 +125,7 @@ func (l *Lexer) Next() token.Token {
 
 	l.nextChar()
 
+	l.last = tok.Type
 	return tok
 }
 
@@ -136,6 +139,12 @@ func isDigit(c byte) bool {
 
 func (l *Lexer) consumeWhitespace() {
 	for l.char == ' ' || l.char == '\t' || l.char == '\n' || l.char == '\r' {
+		// semi-colon insertion
+		// only add eof of statment semi-colon if
+		if l.char == '\n' && l.last != token.LBrace && l.last != token.Terminator {
+			l.char = ';'
+			return
+		}
 		l.nextChar()
 	}
 }
@@ -149,6 +158,7 @@ func (l *Lexer) readIdentifier() token.Token {
 	}
 	id := string(l.buff[p:l.curr])
 
+	l.last = token.Identifier
 	return token.Token{token.LookupIdenifier(id), id, pos}
 }
 
@@ -160,6 +170,8 @@ func (l *Lexer) readNumber() token.Token {
 	for isDigit(l.char) {
 		l.nextChar()
 	}
+
+	l.last = token.Int
 	return token.Token{token.Int, string(l.buff[p:l.curr]), pos}
 }
 
