@@ -1,6 +1,8 @@
 package lexer
 
 import (
+	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"jacob/black/token"
@@ -27,6 +29,9 @@ type Lexer struct {
 	// the last token lexed
 	// used for inserting semi-colon on line break
 	last token.Type
+
+	// stack for checking Balanced brackets, bracces..
+	stack []token.Type
 }
 
 // WithReader creates a new Lexer from the reader
@@ -58,8 +63,9 @@ func (l *Lexer) init(filename string) {
 }
 
 // Next returns the next token in the input stream
-func (l *Lexer) Next() token.Token {
+func (l *Lexer) Next() (token.Token, error) {
 	var tok token.Token
+	var err error
 
 	l.consumeWhitespace()
 
@@ -104,14 +110,20 @@ func (l *Lexer) Next() token.Token {
 		tok = token.New(token.Greater, l.char, l.pos)
 	case '{':
 		tok = token.New(token.LBrace, l.char, l.pos)
+		l.stack = append(l.stack, tok.Type)
 	case '}':
 		tok = token.New(token.RBrace, l.char, l.pos)
+		err = l.popCheck(token.LBrace, tok)
 	case '(':
 		tok = token.New(token.LParen, l.char, l.pos)
+		l.stack = append(l.stack, tok.Type)
 	case ')':
 		tok = token.New(token.RParen, l.char, l.pos)
+		err = l.popCheck(token.LParen, tok)
 	case '[':
 		tok = token.New(token.LBracket, l.char, l.pos)
+		l.stack = append(l.stack, tok.Type)
+		err = l.popCheck(token.LBracket, tok)
 	case ']':
 		tok = token.New(token.RBracket, l.char, l.pos)
 	case '|':
@@ -122,11 +134,14 @@ func (l *Lexer) Next() token.Token {
 		tok = token.New(token.Terminator, l.char, l.pos)
 	case 0:
 		tok = token.New(token.EOF, l.char, l.pos)
+		if len(l.stack) > 0 {
+			err = errors.New(fmt.Sprint("Unclosed ", token.LookupLiteral(l.stack[len(l.stack)-1])))
+		}
 	default:
 		if isLetter(l.char) {
-			return l.readIdentifier()
+			return l.readIdentifier(), nil
 		} else if isDigit(l.char) {
-			return l.readNumber()
+			return l.readNumber(), nil
 		} else {
 			tok = token.New(token.Illegal, l.char, l.pos)
 		}
@@ -135,7 +150,7 @@ func (l *Lexer) Next() token.Token {
 	l.nextChar()
 
 	l.last = tok.Type
-	return tok
+	return tok, err
 }
 
 func isLetter(c byte) bool {
@@ -209,4 +224,17 @@ func (l *Lexer) peekChar() byte {
 		return 0
 	}
 	return l.buff[l.next]
+}
+
+// popCheck brace returning error if Unbalanced
+func (l *Lexer) popCheck(match token.Type, tok token.Token) error {
+	last := len(l.stack) - 1
+	if last < 0 {
+		return errors.New(fmt.Sprint("Extra ", tok.Literal))
+	}
+	if l.stack[last] != match {
+		return errors.New(fmt.Sprint("Unbalanced ", token.LookupLiteral(l.stack[last]), ". Got ", tok.Literal))
+	}
+	l.stack = l.stack[:last]
+	return nil
 }
