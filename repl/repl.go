@@ -50,14 +50,15 @@ func Run(in io.Reader, out io.Writer) {
 		// get current line
 		line := scanner.Text()
 
+		var b bytes.Buffer
+		b.WriteString(line)
+		b.WriteByte('\n')
+
 		// if we open a function or map usinh {
 		// continue reading into a buffer until we reach the maching }
 		// then set this as the whole input
 		if strings.HasSuffix(strings.TrimSpace(line), "{") {
 			var indent int
-			var b bytes.Buffer
-			b.WriteString(line)
-
 			for {
 				fmt.Fprint(out, color(cont, green), strings.Repeat("\t", indent))
 
@@ -67,6 +68,7 @@ func Run(in io.Reader, out io.Writer) {
 
 				nextLine := scanner.Text()
 				b.WriteString(nextLine)
+				b.WriteByte('\n')
 
 				trimmed := strings.TrimSpace(nextLine)
 
@@ -82,10 +84,9 @@ func Run(in io.Reader, out io.Writer) {
 					}
 				}
 			}
-			line = b.String()
 		}
 
-		l := lexer.WithString(line, "repl")
+		l := lexer.WithString(b.String(), "repl")
 
 		for tok, err := l.Next(); tok.Type != token.EOF; tok, err = l.Next() {
 			if err != nil {
