@@ -196,7 +196,17 @@ func (l *Lexer) readNumber() token.Token {
 	}
 
 	l.last = token.Int
-	return token.Token{token.Int, string(l.buff[p:l.curr]), pos}
+
+	// read decimal number
+	if l.char == '.' {
+		l.nextChar()
+		for isDigit(l.char) {
+			l.nextChar()
+		}
+		l.last = token.Double
+	}
+
+	return token.Token{l.last, string(l.buff[p:l.curr]), pos}
 }
 
 func (l *Lexer) nextChar() {

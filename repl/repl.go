@@ -90,6 +90,7 @@ func Run(in io.Reader, out io.Writer) {
 		for tok, err := l.Next(); tok.Type != token.EOF; tok, err = l.Next() {
 			if err != nil {
 				fmt.Fprintln(out, color("Error", red), color(tok.Pos, cyan), "-", err)
+				break
 			}
 			fmt.Fprintln(out, color("#", magneta), "\t", color(tok, yellow), "\t", color(tok.Type, cyan))
 		}

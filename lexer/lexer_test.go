@@ -9,7 +9,7 @@ import (
 func TestNextToken(t *testing.T) {
 
 	input := `let five = 5
-let ten = 10
+let ten = 10.2342
 
 let add = |x, y| {
 	x + y
@@ -34,7 +34,7 @@ let fail = 21`
 		{token.Let, "let"},
 		{token.Identifier, "ten"},
 		{token.Assign, "="},
-		{token.Int, "10"},
+		{token.Double, "10.2342"},
 		{token.Terminator, ";"},
 		{token.Let, "let"},
 		{token.Identifier, "add"},
