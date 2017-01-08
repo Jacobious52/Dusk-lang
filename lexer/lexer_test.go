@@ -1,7 +1,6 @@
 package lexer
 
 import (
-	"jacob/black/lexer"
 	"jacob/black/token"
 	"testing"
 )
@@ -84,7 +83,7 @@ let fail = 21`
 		{token.EOF, string(0)},
 	}
 
-	l := lexer.WithString(input, "lexer_test.go")
+	l := WithString(input, "lexer_test.go")
 
 	for i, tt := range tests {
 		tok, _ := l.Next()

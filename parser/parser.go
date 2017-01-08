@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"jacob/black/ast"
 	"jacob/black/lexer"
 	"jacob/black/token"
@@ -37,7 +38,12 @@ func (p *Parser) nextToken() {
 }
 
 func (p *Parser) newError(str string) {
+	p.errors = append(p.errors, str)
+}
 
+func (p *Parser) newPeekError(t token.Type) {
+	msg := fmt.Sprintf("Expected next token to be %s, got %s instead", t, p.next.Type)
+	p.errors = append(p.errors, msg)
 }
 
 // Errors returns all the errors the parser encountered
@@ -82,7 +88,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	}
 
 	// TODO: don't skip tokens
-	for !p.expectNext(token.Terminator) {
+	for !p.currentIs(token.Terminator) {
 		p.nextToken()
 	}
 
@@ -102,5 +108,6 @@ func (p *Parser) expectNext(t token.Type) bool {
 		p.nextToken()
 		return true
 	}
+	p.newPeekError(t)
 	return false
 }
