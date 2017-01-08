@@ -91,7 +91,7 @@ func Run(in io.Reader, out io.Writer) {
 			if err != nil {
 				fmt.Fprintln(out, color("Error", red), color(tok.Pos, cyan), "-", err)
 			}
-			fmt.Fprintln(out, color("#", magneta), color(tok, yellow))
+			fmt.Fprintln(out, color("#", magneta), "\t", color(tok, yellow), "\t", color(tok.Type, cyan))
 		}
 	}
 }

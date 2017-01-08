@@ -87,13 +87,13 @@ let fail = 21`
 	l := lexer.WithString(input, "lexer_test.go")
 
 	for i, tt := range tests {
-		tok := l.Next()
+		tok, _ := l.Next()
 
 		//t.Logf("%v\t\t%v\n", tok.Literal, tok.Pos)
 
 		if tok.Type != tt.expectedType {
 			t.Fatalf("tests[%d] - Type wrong. expected %q, got %q",
-				i, token.LookupLiteral(tt.expectedType), token.LookupLiteral(tok.Type))
+				i, tt.expectedType, tok.Type)
 		}
 
 		if tok.Literal != tt.expectedLiteral {

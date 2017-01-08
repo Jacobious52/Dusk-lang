@@ -135,7 +135,7 @@ func (l *Lexer) Next() (token.Token, error) {
 	case 0:
 		tok = token.New(token.EOF, l.char, l.pos)
 		if len(l.stack) > 0 {
-			err = errors.New(fmt.Sprint("Unclosed ", token.LookupLiteral(l.stack[len(l.stack)-1])))
+			err = errors.New(fmt.Sprint("Unclosed ", l.stack[len(l.stack)-1]))
 		}
 	default:
 		if isLetter(l.char) {
@@ -233,7 +233,7 @@ func (l *Lexer) popCheck(match token.Type, tok token.Token) error {
 		return errors.New(fmt.Sprint("Extra ", tok.Literal))
 	}
 	if l.stack[last] != match {
-		return errors.New(fmt.Sprint("Unbalanced ", token.LookupLiteral(l.stack[last]), ". Got ", tok.Literal))
+		return errors.New(fmt.Sprint("Unbalanced ", l.stack[last], ". Got ", tok.Literal))
 	}
 	l.stack = l.stack[:last]
 	return nil

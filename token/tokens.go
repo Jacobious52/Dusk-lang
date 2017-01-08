@@ -80,7 +80,7 @@ const (
 
 // LookupLiteral returns string for type
 // Only used in debugging and testing
-func LookupLiteral(t Type) string {
+func (t Type) String() string {
 	switch t {
 	case Assign:
 		return "="
