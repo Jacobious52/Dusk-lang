@@ -8,7 +8,7 @@ const (
 	Identifier // Identifier any varible name
 
 	Int    // Int literal type
-	Double // Double literal type
+	Float  // Double literal type
 	String // Double literal type
 
 	Assign  // Assign =
@@ -90,8 +90,8 @@ func (t Type) String() string {
 		return "Identifier"
 	case Int:
 		return "Int"
-	case Double:
-		return "Double"
+	case Float:
+		return "Float"
 	case String:
 		return "String"
 	case Let:

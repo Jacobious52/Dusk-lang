@@ -12,7 +12,7 @@ type (
 	infixParseFn  func(ast.Expression) ast.Expression
 )
 
-type precedence int8
+type precedence int
 
 const (
 	lowest     precedence = (iota + 1)

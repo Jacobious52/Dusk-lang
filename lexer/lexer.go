@@ -205,7 +205,7 @@ func (l *Lexer) readNumber() token.Token {
 		for isDigit(l.char) {
 			l.nextChar()
 		}
-		l.last = token.Double
+		l.last = token.Float
 	}
 
 	return token.Token{l.last, string(l.buff[p:l.curr]), pos}

@@ -33,7 +33,7 @@ let fail = 21`
 		{token.Let, "let"},
 		{token.Identifier, "ten"},
 		{token.Assign, "="},
-		{token.Double, "10.2342"},
+		{token.Float, "10.2342"},
 		{token.Terminator, ";"},
 		{token.Let, "let"},
 		{token.Identifier, "add"},
