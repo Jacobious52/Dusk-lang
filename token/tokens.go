@@ -144,3 +144,14 @@ func (t Type) String() string {
 		return "Unknown"
 	}
 }
+
+// keywords maps the keyword to a Type
+var keywords = map[string]Type{
+	"let":   Let,
+	"if":    If,
+	"else":  Else,
+	"false": False,
+	"true":  True,
+	"for":   For,
+	"ret":   Return,
+}

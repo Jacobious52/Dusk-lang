@@ -22,17 +22,6 @@ func (t Token) String() string {
 	return t.Literal
 }
 
-// keywords maps the keyword to a Type
-var keywords = map[string]Type{
-	"let":    Let,
-	"if":     If,
-	"else":   Else,
-	"false":  False,
-	"true":   True,
-	"for":    For,
-	"return": Return,
-}
-
 // LookupIdenifier returns the Type for a Identifier string
 func LookupIdenifier(id string) Type {
 	if tok, ok := keywords[id]; ok {

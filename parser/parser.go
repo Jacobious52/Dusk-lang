@@ -69,6 +69,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.current.Type {
 	case token.Let:
 		return p.parseLetStatement()
+	case token.Return:
+		return p.parseReturnStatement()
 	default:
 		return nil
 	}
@@ -93,6 +95,19 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	}
 
 	return let
+}
+
+func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
+	ret := &ast.ReturnStatement{Token: p.current}
+
+	p.nextToken()
+
+	// TODO: don't skip tokens
+	for !p.currentIs(token.Terminator) {
+		p.nextToken()
+	}
+
+	return ret
 }
 
 func (p *Parser) currentIs(t token.Type) bool {
