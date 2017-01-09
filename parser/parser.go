@@ -7,6 +7,23 @@ import (
 	"jacob/black/token"
 )
 
+type (
+	prefixParseFn func() ast.Expression
+	infixParseFn  func(ast.Expression) ast.Expression
+)
+
+type precedence int8
+
+const (
+	lowest     precedence = (iota + 1)
+	equals                // ==
+	inequality            // < >
+	sum                   // +
+	product               // *
+	prefix                // -X or !X
+	call                  // f(x)
+)
+
 // Parser parses into a ast from the lexer
 type Parser struct {
 	l *lexer.Lexer
@@ -15,16 +32,30 @@ type Parser struct {
 	next    token.Token
 
 	errors []string
+
+	prefixParseFns map[token.Type]prefixParseFn
+	infixParseFn   map[token.Type]infixParseFn
 }
 
 // New creates a new parser with the lexer l
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{l: l}
 
+	p.prefixParseFns = make(map[token.Type]prefixParseFn)
+	p.registerPrefix(token.Identifier, p.parseIdentifier)
+
 	p.nextToken()
 	p.nextToken()
 
 	return p
+}
+
+func (p *Parser) registerPrefix(t token.Type, f prefixParseFn) {
+	p.prefixParseFns[t] = f
+}
+
+func (p *Parser) registerInfix(t token.Type, f infixParseFn) {
+	p.infixParseFn[t] = f
 }
 
 func (p *Parser) nextToken() {
@@ -72,7 +103,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.Return:
 		return p.parseReturnStatement()
 	default:
-		return nil
+		return p.parseExpressionStatement()
 	}
 }
 
@@ -89,6 +120,8 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 		return nil
 	}
 
+	//let.Value = p.parseExpressionStatement().Expression
+
 	// TODO: don't skip tokens
 	for !p.currentIs(token.Terminator) {
 		p.nextToken()
@@ -102,12 +135,38 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 
 	p.nextToken()
 
+	//ret.Value = p.parseExpressionStatement().Expression
+
 	// TODO: don't skip tokens
 	for !p.currentIs(token.Terminator) {
 		p.nextToken()
 	}
 
 	return ret
+}
+
+func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
+	expr := &ast.ExpressionStatement{Token: p.current}
+
+	expr.Expression = p.parseExpression(lowest)
+
+	if p.nextIs(token.Terminator) {
+		p.nextToken()
+	}
+
+	return expr
+}
+
+func (p *Parser) parseExpression(prec precedence) ast.Expression {
+	if prefixParser, ok := p.prefixParseFns[p.current.Type]; ok {
+		leftExpr := prefixParser()
+		return leftExpr
+	}
+	return nil
+}
+
+func (p *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{Token: p.current, Value: p.current.Literal}
 }
 
 func (p *Parser) currentIs(t token.Type) bool {

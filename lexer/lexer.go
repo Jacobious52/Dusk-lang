@@ -59,6 +59,8 @@ func (l *Lexer) init(filename string) {
 	l.pos.Filename = filename
 	l.pos.Line = 1
 
+	l.last = token.Terminator
+
 	l.nextChar()
 }
 
@@ -164,7 +166,7 @@ func isDigit(c byte) bool {
 func (l *Lexer) consumeWhitespace() {
 	for l.char == ' ' || l.char == '\t' || l.char == '\n' || l.char == '\r' {
 		// semi-colon insertion
-		// only add eof of statment semi-colon if
+		// only add end of statment semi-colon if
 		if l.char == '\n' && l.last != token.LBrace && l.last != token.Terminator {
 			l.char = ';'
 			return

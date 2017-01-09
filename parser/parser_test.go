@@ -23,8 +23,11 @@ let foobar = 8383.83;
 	}
 
 	if len(program.Statements) != 3 {
-		t.Fatalf("program.Statements does not contain 3 statements. got %d",
-			len(program.Statements))
+		for _, s := range program.Statements {
+			t.Logf("%v\n", s)
+		}
+		t.Fatalf("program.Statements does not contain 3 statements. got %d\n%s",
+			len(program.Statements), program.String())
 	}
 
 	tests := []struct {
@@ -81,8 +84,11 @@ ret 993322;`
 	checkErrors(t, p)
 
 	if len(program.Statements) != 3 {
-		t.Fatalf("program.Statements does not contain 3 statements. got=%d",
-			len(program.Statements))
+		for _, s := range program.Statements {
+			t.Logf("%v\n", s)
+		}
+		t.Fatalf("program.Statements does not contain 3 statements. got %d\n%s",
+			len(program.Statements), program.String())
 	}
 
 	for _, stmt := range program.Statements {
@@ -95,6 +101,37 @@ ret 993322;`
 			t.Errorf("returnStmt.TokenLiteral not 'return', got %q",
 				returnStmt.TokenLiteral())
 		}
+	}
+}
+
+func TestIdentifierExpression(t *testing.T) {
+	input := "foobar;"
+
+	l := lexer.WithString(input, "parser_test.go")
+	p := New(l)
+	program := p.ParseProgram()
+	checkErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. got=%d",
+			len(program.Statements))
+	}
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	ident, ok := stmt.Expression.(*ast.Identifier)
+	if !ok {
+		t.Fatalf("exp not *ast.Identifier. got=%T", stmt.Expression)
+	}
+	if ident.Value != "foobar" {
+		t.Errorf("ident.Value not %s. got=%s", "foobar", ident.Value)
+	}
+	if ident.TokenLiteral() != "foobar" {
+		t.Errorf("ident.TokenLiteral not %s. got=%s", "foobar",
+			ident.TokenLiteral())
 	}
 }
 

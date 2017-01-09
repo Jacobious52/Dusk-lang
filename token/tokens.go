@@ -2,80 +2,48 @@ package token
 
 // All valid token types
 const (
-	// Illegal type means it is a non recognised token
-	Illegal Type = (iota - 1)
-	// EOF is the end of the file stream
-	EOF
+	Illegal Type = (iota - 1) // Illegal type means it is a non recognised token
+	EOF                       // EOF is the end of the file stream
 
-	// Identifier any varible name
-	Identifier
+	Identifier // Identifier any varible name
 
-	// Int literal type
-	Int
-	// Double literal type
-	Double
-	// String literal type
-	String
+	Int    // Int literal type
+	Double // Double literal type
+	String // Double literal type
 
-	// Assign =
-	Assign
-	// Plus +
-	Plus
-	// Minus -
-	Minus
-	// Times *
-	Times
-	// Divide /
-	Divide
-	// Bang !
-	Bang
-	// Less <
-	Less
-	// Greater >
-	Greater
+	Assign  // Assign =
+	Plus    // Plus +
+	Minus   // Minus -
+	Times   // Times *
+	Divide  // Divide /
+	Bang    // Bang !
+	Less    // Less <
+	Greater // Greater >
 
-	// Equal ==
-	Equal
-	// NotEqual !=
-	NotEqual
+	Equal    // Equal ==
+	NotEqual // NotEqual !=
 
-	// Comma ,
-	Comma
-	// Terminator is the end of statement terminator
-	Terminator
+	Comma      // Comma ,
+	Terminator // Terminator is the end of statement terminator
 
-	// LParen (
-	LParen
-	// RParen )
-	RParen
+	LParen // LParen (
+	RParen // RParen )
 
-	// LBrace {
-	LBrace
-	// RBrace }
-	RBrace
+	LBrace // LBrace {
+	RBrace // RBrace }
 
-	// LBracket [
-	LBracket
-	// RBracket ]
-	RBracket
+	LBracket // LBracket [
+	RBracket // RBracket ]
 
-	// Bar |  - donotes function arg bar
-	Bar
+	Bar // Bar |  - donotes function arg bar
 
-	// Let keyword
-	Let
-	// If keyword
-	If
-	// Else keyword
-	Else
-	// For keyword
-	For
-	// Return keyword
-	Return
-	// True keyword
-	True
-	// False keyword
-	False
+	Let    // Let keyword
+	If     // If keyword
+	Else   // Else keyword
+	For    // For keyword
+	Return // Ret keyword
+	True   // True keyword
+	False  // False keyword
 )
 
 // LookupLiteral returns string for type

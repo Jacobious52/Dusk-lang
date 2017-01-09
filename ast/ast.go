@@ -15,10 +15,21 @@ type Program struct {
 
 // LetStatement ::= 'let' Identifier '=' Expression
 type LetStatement struct {
-	// token.Let
-	Token token.Token
+	Token token.Token // token.Let
 	Name  *Identifier
 	Value Expression
+}
+
+// ReturnStatement ::= 'ret' expression
+type ReturnStatement struct {
+	Token token.Token // token.Return
+	Value Expression
+}
+
+// ExpressionStatement ::= (Number | Literal | Operator | Identifier) Expression?
+type ExpressionStatement struct {
+	Token      token.Token // first token of the expression
+	Expression Expression
 }
 
 // Identifier ::= name
@@ -26,17 +37,4 @@ type Identifier struct {
 	// token.Identifier
 	Token token.Token
 	Value string
-}
-
-// ReturnStatement ::= 'ret' expression
-type ReturnStatement struct {
-	// token.Return
-	Token token.Token
-	Value Expression
-}
-
-// ExpressionStatement ::= (Number | Operator | Identifier) Expression?
-type ExpressionStatement struct {
-	Token      token.Token // the first token of the expression
-	Expression Expression
 }
