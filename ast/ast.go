@@ -26,7 +26,7 @@ type ReturnStatement struct {
 	Value Expression
 }
 
-// ExpressionStatement ::= (Number | Literal | Operator | Identifier) Expression?
+// ExpressionStatement ::= (IntegerLiteral | FloatLiteral | StringLiteral | Operator | Identifier) Expression?
 type ExpressionStatement struct {
 	Token      token.Token // first token of the expression
 	Expression Expression
@@ -34,7 +34,18 @@ type ExpressionStatement struct {
 
 // Identifier ::= name
 type Identifier struct {
-	// token.Identifier
-	Token token.Token
+	Token token.Token // token.Identifier
 	Value string
+}
+
+// IntegerLiteral ::= int of 64 bits
+type IntegerLiteral struct {
+	Token token.Token // token.Int
+	Value int64
+}
+
+// FloatLiteral ::= float of 64 bits
+type FloatLiteral struct {
+	Token token.Token // token.Float
+	Value float64
 }

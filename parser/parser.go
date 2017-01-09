@@ -5,6 +5,7 @@ import (
 	"jacob/black/ast"
 	"jacob/black/lexer"
 	"jacob/black/token"
+	"strconv"
 )
 
 type (
@@ -43,6 +44,8 @@ func New(l *lexer.Lexer) *Parser {
 
 	p.prefixParseFns = make(map[token.Type]prefixParseFn)
 	p.registerPrefix(token.Identifier, p.parseIdentifier)
+	p.registerPrefix(token.Int, p.parseIntegerLiteral)
+	p.registerPrefix(token.Float, p.parseFloatLiteral)
 
 	p.nextToken()
 	p.nextToken()
@@ -73,7 +76,7 @@ func (p *Parser) newError(str string) {
 }
 
 func (p *Parser) newPeekError(t token.Type) {
-	msg := fmt.Sprintf("Expected next token to be %s, got %s instead", t, p.next.Type)
+	msg := fmt.Sprintf("%q: Expected next token to be %s, got %s instead", p.next.Pos, t, p.next.Type)
 	p.errors = append(p.errors, msg)
 }
 
@@ -167,6 +170,34 @@ func (p *Parser) parseExpression(prec precedence) ast.Expression {
 
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.current, Value: p.current.Literal}
+}
+
+func (p *Parser) parseIntegerLiteral() ast.Expression {
+	lit := &ast.IntegerLiteral{Token: p.current}
+
+	if val, err := strconv.ParseInt(p.current.Literal, 0, 64); err == nil {
+		lit.Value = val
+		return lit
+	}
+
+	msg := fmt.Sprintf("%q: Could not parse %q as Integer", p.current.Pos, p.current.Literal)
+	p.newError(msg)
+
+	return nil
+}
+
+func (p *Parser) parseFloatLiteral() ast.Expression {
+	lit := &ast.FloatLiteral{Token: p.current}
+
+	if val, err := strconv.ParseFloat(p.current.Literal, 64); err == nil {
+		lit.Value = val
+		return lit
+	}
+
+	msg := fmt.Sprintf("%q: Could not parse %q as Float", p.current.Pos, p.current.Literal)
+	p.newError(msg)
+
+	return nil
 }
 
 func (p *Parser) currentIs(t token.Type) bool {

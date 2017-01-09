@@ -166,6 +166,37 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	}
 }
 
+func TestFloatLiteralExpression(t *testing.T) {
+	input := "5.34535;"
+
+	l := lexer.WithString(input, "parser.go")
+	p := New(l)
+	program := p.ParseProgram()
+	checkErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. got=%d",
+			len(program.Statements))
+	}
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	literal, ok := stmt.Expression.(*ast.FloatLiteral)
+	if !ok {
+		t.Fatalf("exp not *ast.FloatLiteral. got=%T", stmt.Expression)
+	}
+	if literal.Value != 5.34535 {
+		t.Errorf("literal.Value not %f. got=%f", 5.34535, literal.Value)
+	}
+	if literal.TokenLiteral() != "5.34535" {
+		t.Errorf("literal.TokenLiteral not %s. got=%s", "5.34535",
+			literal.TokenLiteral())
+	}
+}
+
 func checkErrors(t *testing.T, p *Parser) {
 	errors := p.Errors()
 	if len(errors) == 0 {

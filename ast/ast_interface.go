@@ -38,6 +38,16 @@ func (r *ReturnStatement) TokenLiteral() string {
 	return r.Token.Literal
 }
 
+// TokenLiteral for IntegerLiteral
+func (i *IntegerLiteral) TokenLiteral() string {
+	return i.Token.Literal
+}
+
+// TokenLiteral for FloatLiteral
+func (f *FloatLiteral) TokenLiteral() string {
+	return f.Token.Literal
+}
+
 // **---String-implementations---** //
 
 // String for Program
@@ -96,6 +106,16 @@ func (e *ExpressionStatement) String() string {
 	return ""
 }
 
+// String for IntegerLiteral
+func (i *IntegerLiteral) String() string {
+	return i.Token.Literal
+}
+
+// String for FloatLiteral
+func (f *FloatLiteral) String() string {
+	return f.Token.Literal
+}
+
 // Statement is the basis for a statment in the ast
 type Statement interface {
 	Node
@@ -116,4 +136,6 @@ type Expression interface {
 
 // **---expressionNode-implementations---** //
 
-func (i *Identifier) expressionNode() {}
+func (i *Identifier) expressionNode()     {}
+func (i *IntegerLiteral) expressionNode() {}
+func (f *FloatLiteral) expressionNode()   {}
