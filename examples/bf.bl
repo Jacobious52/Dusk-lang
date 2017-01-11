@@ -1,0 +1,67 @@
+
+// as to be compatable in 0.1
+// 0.2 will add stuff like
+// multple let assignments e.g (let a, b = 0)
+// reverse function calling syntax  e.g (let b = a1.a2.call(a3))
+
+// stack pointer and stack
+let sp = 0
+let stack = array(1024, 0)
+
+// instruction pointer
+let ip = 0
+// source string. opcodes
+let src = ""
+
+// locations of the branch instruction '[' to jump back to
+let branches = []
+
+let leftBranch = || {
+    if stack[sp] == 0
+        branches = push(branches, ip)
+        while src[ip] != ']' {
+            if ip > len(src)-1 {
+                break
+            }
+            ip++
+        }
+    }
+}
+
+let rightBranch = || {
+    if stack[sp] != 0 {
+        ip = pop(branches)
+    }
+}
+
+let opFunctions = {
+    '>' : -> sp += 1
+    '<' : -> sp -= 1
+    '+' : -> stack[sp] += 1
+    '-' : -> stack[sp] -= 1
+    '.' : -> show(stack[sp])
+    ',' : -> sp = readc()
+    '[' : leftBranch
+    ']' : rightBranch
+}
+
+let add = |a,b| {
+    ret a + b
+}
+
+let main = |args| {
+
+    src = reads()
+
+    while ip < len(src) {
+        let func = opFunctions[src[ip]]
+        if ?func {
+            func()
+            sp += 1
+        }
+    }
+
+    ret 0
+}
+
+main()

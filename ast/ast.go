@@ -28,8 +28,26 @@ type ReturnStatement struct {
 
 // ExpressionStatement ::= (IntegerLiteral | FloatLiteral | StringLiteral | Operator | Identifier) Expression?
 type ExpressionStatement struct {
-	Token      token.Token // first token of the expression
+	// first token of the expression
+	Token      token.Token
 	Expression Expression
+}
+
+// PrefixExpression ::= Operator Expression
+type PrefixExpression struct {
+	// prefix token ! & -
+	Token    token.Token
+	Operator string
+	Right    Expression
+}
+
+// InfixExpression ::= Expression Operator Expression
+type InfixExpression struct {
+	// The operator
+	Token    token.Token
+	Left     Expression
+	Operator string
+	Right    Expression
 }
 
 // Identifier ::= name

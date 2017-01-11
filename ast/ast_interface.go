@@ -48,6 +48,16 @@ func (f *FloatLiteral) TokenLiteral() string {
 	return f.Token.Literal
 }
 
+// TokenLiteral for PrefixExpression
+func (p *PrefixExpression) TokenLiteral() string {
+	return p.Token.Literal
+}
+
+// TokenLiteral for InfixExpression
+func (i *InfixExpression) TokenLiteral() string {
+	return i.Token.Literal
+}
+
 // **---String-implementations---** //
 
 // String for Program
@@ -75,6 +85,33 @@ func (l *LetStatement) String() string {
 	}
 
 	b.WriteByte(';')
+
+	return b.String()
+}
+
+// String for PrefixExpression
+func (p *PrefixExpression) String() string {
+	var b bytes.Buffer
+
+	b.WriteByte('(')
+	b.WriteString(p.Operator)
+	b.WriteString(p.Right.String())
+	b.WriteByte(')')
+
+	return b.String()
+}
+
+// String for PrefixExpression
+func (i *InfixExpression) String() string {
+	var b bytes.Buffer
+
+	b.WriteString("(")
+	b.WriteString(i.Left.String())
+	b.WriteByte(' ')
+	b.WriteString(i.Operator)
+	b.WriteByte(' ')
+	b.WriteString(i.Right.String())
+	b.WriteString(")")
 
 	return b.String()
 }
@@ -136,6 +173,8 @@ type Expression interface {
 
 // **---expressionNode-implementations---** //
 
-func (i *Identifier) expressionNode()     {}
-func (i *IntegerLiteral) expressionNode() {}
-func (f *FloatLiteral) expressionNode()   {}
+func (i *Identifier) expressionNode()       {}
+func (i *IntegerLiteral) expressionNode()   {}
+func (f *FloatLiteral) expressionNode()     {}
+func (p *PrefixExpression) expressionNode() {}
+func (i *InfixExpression) expressionNode()  {}
