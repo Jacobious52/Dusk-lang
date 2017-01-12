@@ -162,10 +162,11 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 		return nil
 	}
 
-	//let.Value = p.parseExpressionStatement().Expression
+	p.nextToken()
 
-	// TODO: don't skip tokens
-	for !p.currentIs(token.Terminator) {
+	let.Value = p.parseExpression(lowest)
+
+	if p.nextIs(token.Terminator) {
 		p.nextToken()
 	}
 
@@ -177,10 +178,9 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 
 	p.nextToken()
 
-	//ret.Value = p.parseExpressionStatement().Expression
+	ret.Value = p.parseExpression(lowest)
 
-	// TODO: don't skip tokens
-	for !p.currentIs(token.Terminator) {
+	if p.nextIs(token.Terminator) {
 		p.nextToken()
 	}
 
