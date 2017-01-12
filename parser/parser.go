@@ -8,6 +8,14 @@ import (
 	"strconv"
 )
 
+// Error holds a parser Error
+// the positon it happended
+// a message
+type Error struct {
+	Str string
+	Pos token.Position
+}
+
 type (
 	prefixParseFn func() ast.Expression
 	infixParseFn  func(ast.Expression) ast.Expression
@@ -43,7 +51,7 @@ type Parser struct {
 	current token.Token
 	next    token.Token
 
-	errors []string
+	errors []Error
 
 	prefixParseFns map[token.Type]prefixParseFn
 	infixParseFn   map[token.Type]infixParseFn
@@ -59,6 +67,9 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.Float, p.parseFloatLiteral)
 	p.registerPrefix(token.Bang, p.parsePrefixExpression)
 	p.registerPrefix(token.Minus, p.parsePrefixExpression)
+	p.registerPrefix(token.True, p.parseBooleanExpression)
+	p.registerPrefix(token.False, p.parseBooleanExpression)
+	p.registerPrefix(token.LParen, p.parseGroupedExpression)
 
 	p.infixParseFn = make(map[token.Type]infixParseFn)
 	p.registerInfix(token.Plus, p.parseInfixExpression)
@@ -111,16 +122,16 @@ func (p *Parser) nextToken() {
 }
 
 func (p *Parser) newError(str string) {
-	p.errors = append(p.errors, str)
+	p.errors = append(p.errors, Error{str, p.current.Pos})
 }
 
 func (p *Parser) newPeekError(t token.Type) {
-	msg := fmt.Sprintf("%q: Expected next token to be %s, got %s instead", p.next.Pos, t, p.next.Type)
-	p.errors = append(p.errors, msg)
+	msg := fmt.Sprintf("expected next token to be %s, got %s instead", t, p.next.Type)
+	p.errors = append(p.errors, Error{msg, p.current.Pos})
 }
 
 // Errors returns all the errors the parser encountered
-func (p *Parser) Errors() []string {
+func (p *Parser) Errors() []Error {
 	return p.errors
 }
 
@@ -203,7 +214,7 @@ func (p *Parser) parseExpression(prec precedence) ast.Expression {
 	// try parse prefix expression first
 	prefixParser, ok := p.prefixParseFns[p.current.Type]
 	if !ok {
-		p.newError(fmt.Sprintf("%s: No operand for prefix operator '%s' found", p.current.Pos, p.current.Type))
+		p.newError(fmt.Sprintf("no operand for prefix operator '%s' found", p.current.Type))
 		return nil
 	}
 	leftExpr := prefixParser()
@@ -242,6 +253,15 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	return expr
 }
 
+func (p *Parser) parseGroupedExpression() ast.Expression {
+	p.nextToken()
+	expr := p.parseExpression(lowest)
+	if !p.expectNext(token.RParen) {
+		return nil
+	}
+	return expr
+}
+
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.current, Value: p.current.Literal}
 }
@@ -254,7 +274,7 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 		return lit
 	}
 
-	msg := fmt.Sprintf("%q: Could not parse %q as Integer", p.current.Pos, p.current.Literal)
+	msg := fmt.Sprintf("could not parse %q as Integer", p.current.Literal)
 	p.newError(msg)
 
 	return nil
@@ -268,10 +288,14 @@ func (p *Parser) parseFloatLiteral() ast.Expression {
 		return lit
 	}
 
-	msg := fmt.Sprintf("%s: Could not parse %s as Float", p.current.Pos, p.current.Literal)
+	msg := fmt.Sprintf("could not parse %s as Float", p.current.Literal)
 	p.newError(msg)
 
 	return nil
+}
+
+func (p *Parser) parseBooleanExpression() ast.Expression {
+	return &ast.BooleanLiteral{p.current, p.currentIs(token.True)}
 }
 
 func (p *Parser) currentIs(t token.Type) bool {

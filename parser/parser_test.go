@@ -16,7 +16,7 @@ func TestLetStatements(t *testing.T) {
 	}{
 		{"let x = 5;", "x", 5},
 		{"let x = 5.4;", "x", 5.4},
-		/*{"let y = true;", "y", true},*/
+		{"let y = true;", "y", true},
 		{"let foobar = y;", "foobar", "y"},
 	}
 
@@ -120,8 +120,8 @@ func TestParsingPrefixExpressions(t *testing.T) {
 		{"-15;", "-", 15},
 		{"!foobar;", "!", "foobar"},
 		{"-foobar;", "-", "foobar"},
-		/*{"!true;", "!", true},
-		{"!false;", "!", false},*/
+		{"!true;", "!", true},
+		{"!false;", "!", false},
 	}
 
 	for _, tt := range prefixTests {
@@ -178,9 +178,9 @@ func TestParsingInfixExpressions(t *testing.T) {
 		{"foobar < barfoo;", "foobar", "<", "barfoo"},
 		{"foobar == barfoo;", "foobar", "==", "barfoo"},
 		{"foobar != barfoo;", "foobar", "!=", "barfoo"},
-		/*{"true == true", true, "==", true},
+		{"true == true", true, "==", true},
 		{"true != false", true, "!=", false},
-		{"false == false", false, "==", false},*/
+		{"false == false", false, "==", false},
 	}
 
 	for _, tt := range infixTests {
@@ -264,7 +264,7 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 			"3 + 4 * 5 == 3 * 1 + 4 * 5",
 			"((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
 		},
-		/*{
+		{
 			"true",
 			"true",
 		},
@@ -304,18 +304,19 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 			"!(true == true)",
 			"(!(true == true))",
 		},
-		{
-			"a + add(b * c) + d",
-			"((a + add((b * c))) + d)",
-		},
-		{
-			"add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))",
-			"add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
-		},
-		{
-			"add(a + b + c * d / f + g)",
-			"add((((a + b) + ((c * d) / f)) + g))",
-		},*/
+		/*
+			{
+				"a + add(b * c) + d",
+				"((a + add((b * c))) + d)",
+			},
+			{
+				"add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))",
+				"add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
+			},
+			{
+				"add(a + b + c * d / f + g)",
+				"add((((a + b) + ((c * d) / f)) + g))",
+			},*/
 	}
 
 	for _, tt := range tests {
@@ -331,7 +332,7 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 	}
 }
 
-/*func TestBooleanExpression(t *testing.T) {
+func TestBooleanExpression(t *testing.T) {
 	tests := []struct {
 		input           string
 		expectedBoolean bool
@@ -357,7 +358,7 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 				program.Statements[0])
 		}
 
-		boolean, ok := stmt.Expression.(*ast.Boolean)
+		boolean, ok := stmt.Expression.(*ast.BooleanLiteral)
 		if !ok {
 			t.Fatalf("exp not *ast.Boolean. got=%T", stmt.Expression)
 		}
@@ -366,7 +367,8 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 				boolean.Value)
 		}
 	}
-}*/
+}
+
 /*
 func TestIfExpression(t *testing.T) {
 	input := `if (x < y) { x }`
@@ -712,8 +714,8 @@ func testLiteralExpression(t *testing.T, exp ast.Expression, expected interface{
 		return testFloatLiteral(t, exp, v)
 	case string:
 		return testIdentifier(t, exp, v)
-		/*case bool:
-		return testBooleanLiteral(t, exp, v)*/
+	case bool:
+		return testBooleanLiteral(t, exp, v)
 	}
 	t.Errorf("type of exp not handled. got=%T", exp)
 	return false
@@ -782,9 +784,8 @@ func testIdentifier(t *testing.T, exp ast.Expression, value string) bool {
 	return true
 }
 
-/*
 func testBooleanLiteral(t *testing.T, exp ast.Expression, value bool) bool {
-	bo, ok := exp.(*ast.Boolean)
+	bo, ok := exp.(*ast.BooleanLiteral)
 	if !ok {
 		t.Errorf("exp not *ast.Boolean. got=%T", exp)
 		return false
@@ -803,7 +804,6 @@ func testBooleanLiteral(t *testing.T, exp ast.Expression, value bool) bool {
 
 	return true
 }
-*/
 
 func checkParserErrors(t *testing.T, p *Parser) {
 	errors := p.Errors()

@@ -6,13 +6,12 @@ import (
 	"fmt"
 	"io"
 	"jacob/black/lexer"
-	"jacob/black/token"
+	"jacob/black/parser"
 	"strings"
 )
 
 const (
-	prompt = "=> "
-	cont   = ".. "
+	prompt = "| "
 	intro  = "\033[2J\033[0;0HBlack Programming Langaguge (Repl). © Jacob Gonzalez 2017\n\n"
 )
 
@@ -41,7 +40,8 @@ func Run(in io.Reader, out io.Writer) {
 
 	// Read until EOF
 	for {
-		fmt.Fprint(out, color(prompt, green))
+		lineNum := 1
+		fmt.Fprint(out, lineNum, color(prompt, green))
 
 		if ok := scanner.Scan(); !ok {
 			return
@@ -60,7 +60,8 @@ func Run(in io.Reader, out io.Writer) {
 		if strings.HasSuffix(strings.TrimSpace(line), "{") {
 			var indent int
 			for {
-				fmt.Fprint(out, color(cont, green), strings.Repeat("\t", indent))
+				lineNum++
+				fmt.Fprint(out, lineNum, color(prompt, blue), strings.Repeat("\t", indent))
 
 				if ok := scanner.Scan(); !ok {
 					return
@@ -87,13 +88,27 @@ func Run(in io.Reader, out io.Writer) {
 		}
 
 		l := lexer.WithString(b.String(), "repl")
+		p := parser.New(l)
 
-		for tok, err := l.Next(); tok.Type != token.EOF; tok, err = l.Next() {
-			if err != nil {
-				fmt.Fprintln(out, color("Error", red), color(tok.Pos, cyan), "-", err)
-				break
-			}
-			fmt.Fprintln(out, color("#", magneta), "\t", color(tok, yellow), "\t", color(tok.Type, cyan))
+		program := p.ParseProgram()
+
+		if len(program.Statements) == 0 {
+			continue
 		}
+
+		if len(p.Errors()) != 0 {
+			printErrors(out, p.Errors())
+			continue
+		}
+
+		fmt.Fprintln(out, "", color(prompt, magneta), "\t", color(program.String(), yellow))
+		fmt.Fprint(out, "\n")
 	}
+}
+
+func printErrors(out io.Writer, errors []parser.Error) {
+	for _, err := range errors {
+		fmt.Fprintln(out, "", color(prompt, red), "\t", color(fmt.Sprint(err.Pos, ":"), red), err.Str)
+	}
+	fmt.Fprint(out, "\n")
 }

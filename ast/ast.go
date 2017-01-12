@@ -67,3 +67,9 @@ type FloatLiteral struct {
 	Token token.Token // token.Float
 	Value float64
 }
+
+// BooleanLiteral ::= True | False
+type BooleanLiteral struct {
+	Token token.Token
+	Value bool
+}

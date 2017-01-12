@@ -48,6 +48,11 @@ func (f *FloatLiteral) TokenLiteral() string {
 	return f.Token.Literal
 }
 
+// TokenLiteral for BooleanLiteral
+func (b *BooleanLiteral) TokenLiteral() string {
+	return b.Token.Literal
+}
+
 // TokenLiteral for PrefixExpression
 func (p *PrefixExpression) TokenLiteral() string {
 	return p.Token.Literal
@@ -132,7 +137,9 @@ func (r *ReturnStatement) String() string {
 	return b.String()
 }
 
-func (i *Identifier) String() string { return i.Value }
+func (i *Identifier) String() string {
+	return i.Value
+}
 
 // String for ExpressionStatement
 func (e *ExpressionStatement) String() string {
@@ -151,6 +158,10 @@ func (i *IntegerLiteral) String() string {
 // String for FloatLiteral
 func (f *FloatLiteral) String() string {
 	return f.Token.Literal
+}
+
+func (b *BooleanLiteral) String() string {
+	return b.Token.Literal
 }
 
 // Statement is the basis for a statment in the ast
@@ -178,3 +189,4 @@ func (i *IntegerLiteral) expressionNode()   {}
 func (f *FloatLiteral) expressionNode()     {}
 func (p *PrefixExpression) expressionNode() {}
 func (i *InfixExpression) expressionNode()  {}
+func (b *BooleanLiteral) expressionNode()   {}
