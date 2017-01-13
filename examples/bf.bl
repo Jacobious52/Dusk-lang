@@ -16,11 +16,11 @@ let src = ""
 // locations of the branch instruction '[' to jump back to
 let branches = []
 
-let leftBranch = || {
+let leftBranch = ! {
     if stack[sp] == 0
-        branches = push(branches, ip)
+        branches = push|branches, ip|
         while src[ip] != ']' {
-            if ip > len(src)-1 {
+            if ip > len|src|-1 {
                 break
             }
             ip++
@@ -28,19 +28,19 @@ let leftBranch = || {
     }
 }
 
-let rightBranch = || {
+let rightBranch = ! {
     if stack[sp] != 0 {
-        ip = pop(branches)
+        ip = pop|branches|
     }
 }
 
 let opFunctions = {
-    '>' : -> sp += 1
-    '<' : -> sp -= 1
-    '+' : -> stack[sp] += 1
-    '-' : -> stack[sp] -= 1
-    '.' : -> show(stack[sp])
-    ',' : -> sp = readc()
+    '>' : ! -> sp += 1
+    '<' : ! -> sp -= 1
+    '+' : ! -> stack[sp] += 1
+    '-' : ! -> stack[sp] -= 1
+    '.' : ! -> show|stack[sp]|
+    ',' : ! -> sp = readc!
     '[' : leftBranch
     ']' : rightBranch
 }
@@ -51,12 +51,12 @@ let add = |a,b| {
 
 let main = |args| {
 
-    src = reads()
+    src = reads!
 
-    while ip < len(src) {
+    while ip < len|src| {
         let func = opFunctions[src[ip]]
         if ?func {
-            func()
+            func!
             sp += 1
         }
     }
@@ -64,4 +64,4 @@ let main = |args| {
     ret 0
 }
 
-main()
+main||

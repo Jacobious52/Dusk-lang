@@ -26,12 +26,19 @@ type ReturnStatement struct {
 	Value Expression
 }
 
-// IfExpression ::= 'if' expression ('{' | '->') blockStatment '}'?
+// IfExpression ::= 'if' expression ('{' | '->') BlockStatement '}'?
 type IfExpression struct {
 	Token token.Token // token.If
 	Cond  Expression
 	Do    *BlockStatement
 	Else  *BlockStatement
+}
+
+// FunctionLiteral ::= '|' (Identifier | (Identifier ',')?)* ('{' | '->') BlockStatement '}'?
+type FunctionLiteral struct {
+	Token  token.Token // The first '|' bar token
+	Params []*Identifier
+	Body   *BlockStatement
 }
 
 // BlockStatement ::= Statement*

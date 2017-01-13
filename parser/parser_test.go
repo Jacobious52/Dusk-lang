@@ -485,9 +485,8 @@ func TestIfElseExpression(t *testing.T) {
 	}
 }
 
-/*
 func TestFunctionLiteralParsing(t *testing.T) {
-	input := `fn(x, y) { x + y; }`
+	input := `|x, y| { x + y; }`
 
 	l := lexer.WithString(input, "test")
 	p := New(l)
@@ -511,13 +510,13 @@ func TestFunctionLiteralParsing(t *testing.T) {
 			stmt.Expression)
 	}
 
-	if len(function.Parameters) != 2 {
+	if len(function.Params) != 2 {
 		t.Fatalf("function literal parameters wrong. want 2, got=%d\n",
-			len(function.Parameters))
+			len(function.Params))
 	}
 
-	testLiteralExpression(t, function.Parameters[0], "x")
-	testLiteralExpression(t, function.Parameters[1], "y")
+	testLiteralExpression(t, function.Params[0], "x")
+	testLiteralExpression(t, function.Params[1], "y")
 
 	if len(function.Body.Statements) != 1 {
 		t.Fatalf("function.Body.Statements has not 1 statements. got=%d\n",
@@ -532,16 +531,15 @@ func TestFunctionLiteralParsing(t *testing.T) {
 
 	testInfixExpression(t, bodyStmt.Expression, "x", "+", "y")
 }
-*/
-/*
+
 func TestFunctionParameterParsing(t *testing.T) {
 	tests := []struct {
 		input          string
 		expectedParams []string
 	}{
-		{input: "fn() {};", expectedParams: []string{}},
-		{input: "fn(x) {};", expectedParams: []string{"x"}},
-		{input: "fn(x, y, z) {};", expectedParams: []string{"x", "y", "z"}},
+		{input: "|| {};", expectedParams: []string{}},
+		{input: "|x| {};", expectedParams: []string{"x"}},
+		{input: "|x, y, z| {};", expectedParams: []string{"x", "y", "z"}},
 	}
 
 	for _, tt := range tests {
@@ -553,17 +551,17 @@ func TestFunctionParameterParsing(t *testing.T) {
 		stmt := program.Statements[0].(*ast.ExpressionStatement)
 		function := stmt.Expression.(*ast.FunctionLiteral)
 
-		if len(function.Parameters) != len(tt.expectedParams) {
+		if len(function.Params) != len(tt.expectedParams) {
 			t.Errorf("length parameters wrong. want %d, got=%d\n",
-				len(tt.expectedParams), len(function.Parameters))
+				len(tt.expectedParams), len(function.Params))
 		}
 
 		for i, ident := range tt.expectedParams {
-			testLiteralExpression(t, function.Parameters[i], ident)
+			testLiteralExpression(t, function.Params[i], ident)
 		}
 	}
 }
-*/
+
 /*
 func TestCallExpressionParsing(t *testing.T) {
 	input := "add(1, 2 * 3, 4 + 5);"

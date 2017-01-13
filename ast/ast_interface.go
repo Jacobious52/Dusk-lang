@@ -3,6 +3,7 @@ package ast
 import (
 	"bytes"
 	"jacob/black/token"
+	"strings"
 )
 
 // Node is the the basis element of the ast
@@ -68,6 +69,11 @@ func (i *InfixExpression) TokenLiteral() string {
 
 // TokenLiteral for IfExpression
 func (f *IfExpression) TokenLiteral() string {
+	return f.Token.Literal
+}
+
+// TokenLiteral for FunctionLiteral
+func (f *FunctionLiteral) TokenLiteral() string {
 	return f.Token.Literal
 }
 
@@ -167,6 +173,24 @@ func (f *IfExpression) String() string {
 	return b.String()
 }
 
+// String got FunctionLiteral
+func (f *FunctionLiteral) String() string {
+	var b bytes.Buffer
+
+	params := []string{}
+	for _, p := range f.Params {
+		params = append(params, p.String())
+	}
+
+	b.WriteString(f.TokenLiteral())
+	b.WriteString("(")
+	b.WriteString(strings.Join(params, ", "))
+	b.WriteString(") ")
+	b.WriteString(f.Body.String())
+
+	return b.String()
+}
+
 // String for BlockStatement
 func (bs *BlockStatement) String() string {
 	var b bytes.Buffer
@@ -243,3 +267,4 @@ func (p *PrefixExpression) expressionNode() {}
 func (i *InfixExpression) expressionNode()  {}
 func (b *BooleanLiteral) expressionNode()   {}
 func (f *IfExpression) expressionNode()     {}
+func (f *FunctionLiteral) expressionNode()  {}
