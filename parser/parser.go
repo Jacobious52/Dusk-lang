@@ -269,19 +269,25 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	p.nextToken()
 	expr.Cond = p.parseExpression(lowest)
 
-	if !p.expectNext(token.LBrace) {
+	// check if with mult statement or single statement
+	if !(p.nextIs(token.LBrace) || p.nextIs(token.Arrow)) {
+		p.newError("expected '{' or '->' following let statement")
 		return nil
 	}
 
+	// goto the { or -> and begin the block statment
+	p.nextToken()
 	expr.Do = p.parseBlockStatement()
 
 	if p.nextIs(token.Else) {
 		p.nextToken()
-
-		if !p.expectNext(token.LBrace) {
+		// current is else. do same check as before
+		if !(p.nextIs(token.LBrace) || p.nextIs(token.Arrow)) {
 			return nil
 		}
 
+		// goto { or -> and parse block
+		p.nextToken()
 		expr.Else = p.parseBlockStatement()
 	}
 
@@ -289,19 +295,31 @@ func (p *Parser) parseIfExpression() ast.Expression {
 }
 
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+	// keep the leading token to tell us if -> or {
 	leading := p.current
-
-	block := &ast.BlockStatement{Token: leading}
-	block.Statements = []ast.Statement{}
-
 	p.nextToken()
+	block := &ast.BlockStatement{Token: leading}
 
-	for !p.currentIs(token.RBrace) {
-		s := p.parseStatement()
-		if s != nil {
-			block.Statements = append(block.Statements, s)
-		}
+	// try parse the first statement. always should be one statment for ->
+	// don't go next token because } might or might not exist
+	s := p.parseStatement()
+	if s != nil {
+		block.Statements = []ast.Statement{s}
+	}
+
+	// if { then keep adding statemnts until }
+	if leading.Type == token.LBrace {
+		// means last statement ended on }. skip it
 		p.nextToken()
+		// keep getting statemnts until we reach final }
+		for !p.currentIs(token.RBrace) {
+			s := p.parseStatement()
+			if s != nil {
+				block.Statements = append(block.Statements, s)
+			}
+			// skip the }
+			p.nextToken()
+		}
 	}
 
 	return block
