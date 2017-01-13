@@ -88,7 +88,18 @@ func (l *Lexer) Next() (token.Token, error) {
 	case '+':
 		tok = token.New(token.Plus, l.char, l.pos)
 	case '-':
-		tok = token.New(token.Minus, l.char, l.pos)
+		if l.peekChar() == '>' {
+			char := l.char
+			l.nextChar()
+
+			b := make([]byte, 2)
+			b[0] = char
+			b[1] = l.char
+
+			tok = token.Token{Type: token.Arrow, Literal: string(b)}
+		} else {
+			tok = token.New(token.Minus, l.char, l.pos)
+		}
 	case '*':
 		tok = token.New(token.Times, l.char, l.pos)
 	case '/':

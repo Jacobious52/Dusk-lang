@@ -23,7 +23,6 @@ const (
 	Equal    // Equal ==
 	NotEqual // NotEqual !=
 
-	Comma      // Comma ,
 	Terminator // Terminator is the end of statement terminator
 
 	LParen // LParen (
@@ -35,7 +34,9 @@ const (
 	LBracket // LBracket [
 	RBracket // RBracket ]
 
-	Bar // Bar |  - donotes function arg bar
+	Comma // Comma ,
+	Bar   // Bar |  - donotes function arg bar
+	Arrow // Arrow - starts a single statment/line block
 
 	Let    // Let keyword
 	If     // If keyword
@@ -80,6 +81,8 @@ func (t Type) String() string {
 		return "]"
 	case Bar:
 		return "|"
+	case Arrow:
+		return "->"
 	case Comma:
 		return ","
 	case Terminator:
