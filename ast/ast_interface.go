@@ -2,7 +2,6 @@ package ast
 
 import (
 	"bytes"
-	"fmt"
 	"jacob/black/token"
 )
 
@@ -196,7 +195,7 @@ func (i *Identifier) String() string {
 // String for ExpressionStatement
 func (e *ExpressionStatement) String() string {
 	if e.Expression != nil {
-		return fmt.Sprint(e.Expression.String(), ";")
+		return e.Expression.String()
 	}
 
 	return ""
