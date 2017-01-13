@@ -369,9 +369,8 @@ func TestBooleanExpression(t *testing.T) {
 	}
 }
 
-/*
 func TestIfExpression(t *testing.T) {
-	input := `if (x < y) { x }`
+	input := `if x < y { x }`
 
 	l := lexer.WithString(input, "test")
 	p := New(l)
@@ -395,31 +394,30 @@ func TestIfExpression(t *testing.T) {
 			stmt.Expression)
 	}
 
-	if !testInfixExpression(t, exp.Condition, "x", "<", "y") {
+	if !testInfixExpression(t, exp.Cond, "x", "<", "y") {
 		return
 	}
 
-	if len(exp.Consequence.Statements) != 1 {
+	if len(exp.Do.Statements) != 1 {
 		t.Errorf("consequence is not 1 statements. got=%d\n",
-			len(exp.Consequence.Statements))
+			len(exp.Do.Statements))
 	}
 
-	consequence, ok := exp.Consequence.Statements[0].(*ast.ExpressionStatement)
+	consequence, ok := exp.Do.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
 		t.Fatalf("Statements[0] is not ast.ExpressionStatement. got=%T",
-			exp.Consequence.Statements[0])
+			exp.Do.Statements[0])
 	}
 
 	if !testIdentifier(t, consequence.Expression, "x") {
 		return
 	}
 
-	if exp.Alternative != nil {
-		t.Errorf("exp.Alternative.Statements was not nil. got=%+v", exp.Alternative)
+	if exp.Else != nil {
+		t.Errorf("exp.Alternative.Statements was not nil. got=%+v", exp.Else)
 	}
 }
-*/
-/*
+
 func TestIfElseExpression(t *testing.T) {
 	input := `if (x < y) { x } else { y }`
 
@@ -444,40 +442,41 @@ func TestIfElseExpression(t *testing.T) {
 		t.Fatalf("stmt.Expression is not ast.IfExpression. got=%T", stmt.Expression)
 	}
 
-	if !testInfixExpression(t, exp.Condition, "x", "<", "y") {
+	if !testInfixExpression(t, exp.Cond, "x", "<", "y") {
 		return
 	}
 
-	if len(exp.Consequence.Statements) != 1 {
+	if len(exp.Do.Statements) != 1 {
 		t.Errorf("consequence is not 1 statements. got=%d\n",
-			len(exp.Consequence.Statements))
+			len(exp.Do.Statements))
 	}
 
-	consequence, ok := exp.Consequence.Statements[0].(*ast.ExpressionStatement)
+	consequence, ok := exp.Do.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
 		t.Fatalf("Statements[0] is not ast.ExpressionStatement. got=%T",
-			exp.Consequence.Statements[0])
+			exp.Do.Statements[0])
 	}
 
 	if !testIdentifier(t, consequence.Expression, "x") {
 		return
 	}
 
-	if len(exp.Alternative.Statements) != 1 {
+	if len(exp.Else.Statements) != 1 {
 		t.Errorf("exp.Alternative.Statements does not contain 1 statements. got=%d\n",
-			len(exp.Alternative.Statements))
+			len(exp.Else.Statements))
 	}
 
-	alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
+	alternative, ok := exp.Else.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
 		t.Fatalf("Statements[0] is not ast.ExpressionStatement. got=%T",
-			exp.Alternative.Statements[0])
+			exp.Else.Statements[0])
 	}
 
 	if !testIdentifier(t, alternative.Expression, "y") {
 		return
 	}
-}*/
+}
+
 /*
 func TestFunctionLiteralParsing(t *testing.T) {
 	input := `fn(x, y) { x + y; }`

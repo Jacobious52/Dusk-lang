@@ -26,25 +26,36 @@ type ReturnStatement struct {
 	Value Expression
 }
 
+// IfExpression ::= 'if' expression ('{' | '->') blockStatment '}'?
+type IfExpression struct {
+	Token token.Token // token.If
+	Cond  Expression
+	Do    *BlockStatement
+	Else  *BlockStatement
+}
+
+// BlockStatement ::= Statement*
+type BlockStatement struct {
+	Token      token.Token // { or ->
+	Statements []Statement
+}
+
 // ExpressionStatement ::= (IntegerLiteral | FloatLiteral | StringLiteral | Operator | Identifier) Expression?
 type ExpressionStatement struct {
-	// first token of the expression
-	Token      token.Token
+	Token      token.Token // first token of the expression
 	Expression Expression
 }
 
 // PrefixExpression ::= Operator Expression
 type PrefixExpression struct {
-	// prefix token ! & -
-	Token    token.Token
+	Token    token.Token // prefix token ! & -
 	Operator string
 	Right    Expression
 }
 
 // InfixExpression ::= Expression Operator Expression
 type InfixExpression struct {
-	// The operator
-	Token    token.Token
+	Token    token.Token // The operator
 	Left     Expression
 	Operator string
 	Right    Expression
@@ -70,6 +81,7 @@ type FloatLiteral struct {
 
 // BooleanLiteral ::= True | False
 type BooleanLiteral struct {
+	// token.True | token.False
 	Token token.Token
 	Value bool
 }

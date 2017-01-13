@@ -1,6 +1,10 @@
 package ast
 
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+	"jacob/black/token"
+)
 
 // Node is the the basis element of the ast
 type Node interface {
@@ -63,6 +67,16 @@ func (i *InfixExpression) TokenLiteral() string {
 	return i.Token.Literal
 }
 
+// TokenLiteral for IfExpression
+func (f *IfExpression) TokenLiteral() string {
+	return f.Token.Literal
+}
+
+// TokenLiteral for BlockStatement
+func (bs *BlockStatement) TokenLiteral() string {
+	return bs.Token.Literal
+}
+
 // **---String-implementations---** //
 
 // String for Program
@@ -89,7 +103,7 @@ func (l *LetStatement) String() string {
 		b.WriteString(l.Value.String())
 	}
 
-	b.WriteByte(';')
+	b.WriteString("; ")
 
 	return b.String()
 }
@@ -137,6 +151,44 @@ func (r *ReturnStatement) String() string {
 	return b.String()
 }
 
+// String for IfExpression
+func (f *IfExpression) String() string {
+	var b bytes.Buffer
+
+	b.WriteString("if ")
+	b.WriteString(f.Cond.String())
+	b.WriteByte(' ')
+	b.WriteString(f.Do.String())
+
+	if f.Else != nil {
+		b.WriteString(" else ")
+		b.WriteString(f.Else.String())
+	}
+
+	return b.String()
+}
+
+// String for BlockStatement
+func (bs *BlockStatement) String() string {
+	var b bytes.Buffer
+
+	b.WriteString(bs.TokenLiteral())
+	b.WriteByte(' ')
+
+	for _, s := range bs.Statements {
+		b.WriteString(s.String())
+	}
+
+	b.WriteByte(' ')
+
+	if bs.Token.Type == token.LBrace {
+		b.WriteByte('}')
+	}
+
+	return b.String()
+}
+
+// String for Identifier
 func (i *Identifier) String() string {
 	return i.Value
 }
@@ -144,7 +196,7 @@ func (i *Identifier) String() string {
 // String for ExpressionStatement
 func (e *ExpressionStatement) String() string {
 	if e.Expression != nil {
-		return e.Expression.String()
+		return fmt.Sprint(e.Expression.String(), ";")
 	}
 
 	return ""
@@ -175,6 +227,7 @@ type Statement interface {
 func (l *LetStatement) statementNode()        {}
 func (e *ExpressionStatement) statementNode() {}
 func (r *ReturnStatement) statementNode()     {}
+func (bs *BlockStatement) statementNode()     {}
 
 // Expression is the basis for a expression in the ast
 type Expression interface {
@@ -190,3 +243,4 @@ func (f *FloatLiteral) expressionNode()     {}
 func (p *PrefixExpression) expressionNode() {}
 func (i *InfixExpression) expressionNode()  {}
 func (b *BooleanLiteral) expressionNode()   {}
+func (f *IfExpression) expressionNode()     {}

@@ -70,6 +70,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.True, p.parseBooleanExpression)
 	p.registerPrefix(token.False, p.parseBooleanExpression)
 	p.registerPrefix(token.LParen, p.parseGroupedExpression)
+	p.registerPrefix(token.If, p.parseIfExpression)
 
 	p.infixParseFn = make(map[token.Type]infixParseFn)
 	p.registerInfix(token.Plus, p.parseInfixExpression)
@@ -126,7 +127,7 @@ func (p *Parser) newError(str string) {
 }
 
 func (p *Parser) newPeekError(t token.Type) {
-	msg := fmt.Sprintf("expected next token to be %s, got %s instead", t, p.next.Type)
+	msg := fmt.Sprintf("expected next token to be '%s', got '%s' instead", t, p.next)
 	p.errors = append(p.errors, Error{msg, p.current.Pos})
 }
 
@@ -214,7 +215,7 @@ func (p *Parser) parseExpression(prec precedence) ast.Expression {
 	// try parse prefix expression first
 	prefixParser, ok := p.prefixParseFns[p.current.Type]
 	if !ok {
-		p.newError(fmt.Sprintf("no operand for prefix operator '%s' found", p.current.Type))
+		p.newError(fmt.Sprintf("'%s' is not a valid operator", p.current))
 		return nil
 	}
 	leftExpr := prefixParser()
@@ -262,6 +263,50 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 	return expr
 }
 
+func (p *Parser) parseIfExpression() ast.Expression {
+	expr := &ast.IfExpression{Token: p.current}
+
+	p.nextToken()
+	expr.Cond = p.parseExpression(lowest)
+
+	if !p.expectNext(token.LBrace) {
+		return nil
+	}
+
+	expr.Do = p.parseBlockStatement()
+
+	if p.nextIs(token.Else) {
+		p.nextToken()
+
+		if !p.expectNext(token.LBrace) {
+			return nil
+		}
+
+		expr.Else = p.parseBlockStatement()
+	}
+
+	return expr
+}
+
+func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+	leading := p.current
+
+	block := &ast.BlockStatement{Token: leading}
+	block.Statements = []ast.Statement{}
+
+	p.nextToken()
+
+	for !p.currentIs(token.RBrace) {
+		s := p.parseStatement()
+		if s != nil {
+			block.Statements = append(block.Statements, s)
+		}
+		p.nextToken()
+	}
+
+	return block
+}
+
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.current, Value: p.current.Literal}
 }
@@ -274,7 +319,7 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 		return lit
 	}
 
-	msg := fmt.Sprintf("could not parse %q as Integer", p.current.Literal)
+	msg := fmt.Sprintf("could not parse '%s' as Integer", p.current.Literal)
 	p.newError(msg)
 
 	return nil
@@ -288,7 +333,7 @@ func (p *Parser) parseFloatLiteral() ast.Expression {
 		return lit
 	}
 
-	msg := fmt.Sprintf("could not parse %s as Float", p.current.Literal)
+	msg := fmt.Sprintf("could not parse '%s' as Float", p.current.Literal)
 	p.newError(msg)
 
 	return nil

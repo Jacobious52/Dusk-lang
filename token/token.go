@@ -17,9 +17,13 @@ func New(t Type, literal byte, pos Position) Token {
 	return Token{t, string(literal), pos}
 }
 
-// Stringer method for Position
+// String for Token
 func (t Token) String() string {
-	return t.Literal
+	lit := t.Type.String()
+	if lit == "Unknown" {
+		return t.Literal
+	}
+	return lit
 }
 
 // LookupIdenifier returns the Type for a Identifier string
