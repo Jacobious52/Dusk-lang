@@ -65,7 +65,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.Identifier, p.parseIdentifier)
 	p.registerPrefix(token.Int, p.parseIntegerLiteral)
 	p.registerPrefix(token.Float, p.parseFloatLiteral)
-	p.registerPrefix(token.Bang, p.parsePrefixExpression)
+	p.registerPrefix(token.Bang, p.parseBangExpression)
 	p.registerPrefix(token.Minus, p.parsePrefixExpression)
 	p.registerPrefix(token.True, p.parseBooleanExpression)
 	p.registerPrefix(token.False, p.parseBooleanExpression)
@@ -238,10 +238,21 @@ func (p *Parser) parseExpression(prec precedence) ast.Expression {
 	return leftExpr
 }
 
+func (p *Parser) parseBangExpression() ast.Expression {
+	// special case for ! for functions with no arguments
+	if p.nextIs(token.LBrace) || p.nextIs(token.Arrow) {
+		return p.parseFunctionLiteral()
+	}
+	// parse a regular prefix Expression
+	return p.parsePrefixExpression()
+}
+
 func (p *Parser) parsePrefixExpression() ast.Expression {
 	expr := &ast.PrefixExpression{Token: p.current, Operator: p.current.Literal}
+
 	p.nextToken()
 	expr.Right = p.parseExpression(prefix)
+
 	return expr
 }
 
@@ -298,7 +309,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 func (p *Parser) parseFunctionLiteral() ast.Expression {
 	f := &ast.FunctionLiteral{Token: p.current}
 
-	// current is |
+	// current is | or !
 	f.Params = p.parseFunctionParams()
 
 	// current is |
@@ -316,14 +327,21 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 func (p *Parser) parseFunctionParams() []*ast.Identifier {
 	ids := []*ast.Identifier{}
 
+	// capture empty args ! and just return
+	if p.currentIs(token.Bang) {
+		return ids
+	}
+
 	// '||' empty params
 	if p.nextIs(token.Bar) {
 		p.nextToken()
 		return ids
 	}
-	p.nextToken()
 
 	// that means at least one param. get it
+	if !p.expectNext(token.Identifier) {
+		return nil
+	}
 	ids = append(ids, &ast.Identifier{p.current, p.current.Literal})
 
 	// keep getting params until no more commas

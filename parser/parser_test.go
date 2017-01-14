@@ -545,6 +545,8 @@ func TestFunctionParameterParsing(t *testing.T) {
 		{input: "|x| {};", expectedParams: []string{"x"}},
 		{input: "|x, y, z| {};", expectedParams: []string{"x", "y", "z"}},
 		{input: "|x, y, z| ->;", expectedParams: []string{"x", "y", "z"}},
+		{input: "! {};", expectedParams: []string{}},
+		{input: "! ->;", expectedParams: []string{}},
 	}
 
 	for _, tt := range tests {
