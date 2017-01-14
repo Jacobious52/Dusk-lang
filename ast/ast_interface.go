@@ -183,9 +183,9 @@ func (f *FunctionLiteral) String() string {
 	}
 
 	b.WriteString(f.TokenLiteral())
-	b.WriteString("(")
 	b.WriteString(strings.Join(params, ", "))
-	b.WriteString(") ")
+	b.WriteString(f.TokenLiteral())
+	b.WriteByte(' ')
 	b.WriteString(f.Body.String())
 
 	return b.String()

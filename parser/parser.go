@@ -272,7 +272,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 
 	// check if with mult statement or single statement
 	if !(p.nextIs(token.LBrace) || p.nextIs(token.Arrow)) {
-		p.newError("expected '{' or '->' following let statement")
+		p.newError("expected '{' or '->' following let statement, got '%s' instead")
 		return nil
 	}
 
@@ -295,17 +295,75 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	return expr
 }
 
+func (p *Parser) parseFunctionLiteral() ast.Expression {
+	f := &ast.FunctionLiteral{Token: p.current}
+
+	// current is |
+	f.Params = p.parseFunctionParams()
+
+	// current is |
+	if !(p.nextIs(token.LBrace) || p.nextIs(token.Arrow)) {
+		p.newError(fmt.Sprintf("expected '{' or '->' following function literal definition, got '%s' instead", p.next))
+		return nil
+	}
+	p.nextToken()
+
+	f.Body = p.parseBlockStatement()
+
+	return f
+}
+
+func (p *Parser) parseFunctionParams() []*ast.Identifier {
+	ids := []*ast.Identifier{}
+
+	// '||' empty params
+	if p.nextIs(token.Bar) {
+		p.nextToken()
+		return ids
+	}
+	p.nextToken()
+
+	// that means at least one param. get it
+	ids = append(ids, &ast.Identifier{p.current, p.current.Literal})
+
+	// keep getting params until no more commas
+	for p.nextIs(token.Comma) {
+		// swollow comma
+		p.nextToken()
+
+		// param must be id
+		if !p.expectNext(token.Identifier) {
+			return nil
+		}
+		ids = append(ids, &ast.Identifier{p.current, p.current.Literal})
+	}
+
+	// must end with bar
+	if !p.expectNext(token.Bar) {
+		return nil
+	}
+
+	return ids
+}
+
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	// keep the leading token to tell us if -> or {
 	leading := p.current
 	p.nextToken()
+
 	block := &ast.BlockStatement{Token: leading}
+	block.Statements = []ast.Statement{}
+
+	// catch empty statement
+	if p.currentIs(token.RBrace) || p.currentIs(token.Terminator) {
+		return block
+	}
 
 	// try parse the first statement. always should be one statment for ->
 	// don't go next token because } might or might not exist
 	s := p.parseStatement()
 	if s != nil {
-		block.Statements = []ast.Statement{s}
+		block.Statements = append(block.Statements, s)
 	}
 
 	// if { then keep adding statemnts until }
