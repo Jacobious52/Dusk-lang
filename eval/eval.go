@@ -98,6 +98,14 @@ func evalInfixExpr(op token.Type, left object.Object, right object.Object) objec
 		return evalFloatInfixExpr(op, left, right)
 	}
 
+	if left.Type() == object.BooleanType && right.Type() == object.BooleanType {
+		if op == token.Equal {
+			return boolToBoolean(left == right)
+		} else if op == token.NotEqual {
+			return boolToBoolean(left != right)
+		}
+	}
+
 	// otherwise 2 objects that don't mismatch
 	return ConstNil
 }
@@ -115,6 +123,14 @@ func evalIntegerInfixExpr(op token.Type, left object.Object, right object.Object
 		return &object.Integer{Value: leftVal * rightVal}
 	case token.Divide:
 		return &object.Integer{Value: leftVal / rightVal}
+	case token.Less:
+		return boolToBoolean(leftVal < rightVal)
+	case token.Greater:
+		return boolToBoolean(leftVal > rightVal)
+	case token.Equal:
+		return boolToBoolean(leftVal == rightVal)
+	case token.NotEqual:
+		return boolToBoolean(leftVal != rightVal)
 	default:
 		return ConstNil
 	}
@@ -133,6 +149,14 @@ func evalFloatInfixExpr(op token.Type, left object.Object, right object.Object) 
 		return &object.Float{Value: leftVal * rightVal}
 	case token.Divide:
 		return &object.Float{Value: leftVal / rightVal}
+	case token.Less:
+		return boolToBoolean(leftVal < rightVal)
+	case token.Greater:
+		return boolToBoolean(leftVal > rightVal)
+	case token.Equal:
+		return boolToBoolean(leftVal == rightVal)
+	case token.NotEqual:
+		return boolToBoolean(leftVal != rightVal)
 	default:
 		return ConstNil
 	}
