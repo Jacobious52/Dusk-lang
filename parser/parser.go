@@ -290,7 +290,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 
 	// check if with mult statement or single statement
 	if !(p.nextIs(token.LBrace) || p.nextIs(token.Arrow)) {
-		p.newError("expected '{' or '->' following if statement, got '%s' instead")
+		p.newError(fmt.Sprintf("expected '{' or '->' following if statement, got '%s' instead", p.next))
 		return nil
 	}
 
@@ -302,7 +302,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 		p.nextToken()
 		// current is else. do same check as before
 		if !(p.nextIs(token.LBrace) || p.nextIs(token.Arrow)) {
-			p.newError("expected '{' or '->' following else statement, got '%s' instead")
+			p.newError(fmt.Sprintf("expected '{' or '->' following else statement, got '%s' instead", p.next))
 			return nil
 		}
 

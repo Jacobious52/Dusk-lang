@@ -97,6 +97,18 @@ func isTruthy(o object.Object) bool {
 	case ConstFalse, ConstNil:
 		return false
 	default:
+		// special case: 0 or 0.0 is not truthy
+		switch o.Type() {
+		case object.IntType:
+			if o.(*object.Integer).Value == 0 {
+				return false
+			}
+		case object.FloatType:
+			if o.(*object.Float).Value == 0.0 {
+				return false
+			}
+		}
+
 		return true
 	}
 }
@@ -134,26 +146,27 @@ func evalInfixExpr(op token.Type, left object.Object, right object.Object) objec
 			// premote right to float
 			val := right.(*object.Integer).Value
 			right = &object.Float{Value: float64(val)}
+			return evalFloatInfixExpr(op, left, right)
+
 		} else if right.Type() == object.FloatType {
 			// right is float, left is int
 			// premote left to float
 			val := left.(*object.Integer).Value
 			left = &object.Float{Value: float64(val)}
-		}
 
-		return evalFloatInfixExpr(op, left, right)
+			return evalFloatInfixExpr(op, left, right)
+		}
 	}
 
-	if left.Type() == object.BooleanType && right.Type() == object.BooleanType {
-		if op == token.Equal {
-			return boolToBoolean(left == right)
-		} else if op == token.NotEqual {
-			return boolToBoolean(left != right)
-		}
+	// compare actual runtime object
+	if op == token.Equal {
+		return boolToBoolean(left == right)
+	} else if op == token.NotEqual {
+		return boolToBoolean(left != right)
 	}
 
 	// otherwise 2 objects that don't match
-	return ConstNil
+	return nil
 }
 
 func evalIntegerInfixExpr(op token.Type, left object.Object, right object.Object) object.Object {
