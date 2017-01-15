@@ -230,7 +230,7 @@ func evalBangOperatorExpr(right object.Object) object.Object {
 	case ConstNil:
 		return ConstTrue
 	default:
-		return ConstFalse
+		return boolToBoolean(!isTruthy(right))
 	}
 }
 
