@@ -121,7 +121,6 @@ func TestBangOperator(t *testing.T) {
 	}
 }
 
-/*
 func TestIfElseExpressions(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -142,11 +141,11 @@ func TestIfElseExpressions(t *testing.T) {
 		if ok {
 			testIntegerObject(t, evaluated, int64(integer))
 		} else {
-			testNullObject(t, evaluated)
+			testNilObject(t, evaluated)
 		}
 	}
 }
-*/
+
 /*
 func TestReturnStatements(t *testing.T) {
 	tests := []struct {
@@ -399,11 +398,10 @@ func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 	return true
 }
 
-/*
 func testNilObject(t *testing.T, obj object.Object) bool {
-	if obj != NIL {
+	if obj != ConstNil {
 		t.Errorf("object is not nil. got=%T (%+v)", obj, obj)
 		return false
 	}
 	return true
-}*/
+}

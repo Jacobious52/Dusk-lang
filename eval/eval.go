@@ -22,6 +22,8 @@ func Eval(node ast.Node) object.Object {
 	// statements
 	case *ast.Program:
 		return evalStatements(node.Statements)
+	case *ast.BlockStatement:
+		return evalStatements(node.Statements)
 	case *ast.ExpressionStatement:
 		return Eval(node.Expression)
 
@@ -33,6 +35,8 @@ func Eval(node ast.Node) object.Object {
 		left := Eval(node.Left)
 		right := Eval(node.Right)
 		return evalInfixExpr(node.Operator, left, right)
+	case *ast.IfExpression:
+		return evalIfExpr(node)
 
 		// literals
 	case *ast.IntegerLiteral:
@@ -53,6 +57,28 @@ func evalStatements(statements []ast.Statement) object.Object {
 	}
 
 	return result
+}
+
+func evalIfExpr(node *ast.IfExpression) object.Object {
+	cond := Eval(node.Cond)
+
+	if isTruthy(cond) {
+		return Eval(node.Do)
+	} else if node.Else != nil {
+		return Eval(node.Else)
+	}
+
+	return ConstNil
+}
+
+// isTruthy - everything is true execpt for false and nil
+func isTruthy(o object.Object) bool {
+	switch o {
+	case ConstFalse, ConstNil:
+		return false
+	default:
+		return true
+	}
 }
 
 func boolToBoolean(b bool) *object.Boolean {
@@ -106,7 +132,7 @@ func evalInfixExpr(op token.Type, left object.Object, right object.Object) objec
 		}
 	}
 
-	// otherwise 2 objects that don't mismatch
+	// otherwise 2 objects that don't match
 	return ConstNil
 }
 
