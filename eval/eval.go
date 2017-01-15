@@ -29,6 +29,10 @@ func Eval(node ast.Node) object.Object {
 	case *ast.PrefixExpression:
 		right := Eval(node.Right)
 		return evalPrefixExpr(node.Operator, right)
+	case *ast.InfixExpression:
+		left := Eval(node.Left)
+		right := Eval(node.Right)
+		return evalInfixExpr(node.Operator, left, right)
 
 		// literals
 	case *ast.IntegerLiteral:
@@ -66,6 +70,72 @@ func evalPrefixExpr(op token.Type, right object.Object) object.Object {
 		return evalMinusPrefixOperatorExpr(right)
 	}
 	return nil
+}
+
+func evalInfixExpr(op token.Type, left object.Object, right object.Object) object.Object {
+	if left.Type() == object.IntType && right.Type() == object.IntType {
+		// both ints. easy
+		return evalIntegerInfixExpr(op, left, right)
+	} else if left.Type() == object.FloatType && right.Type() == object.FloatType {
+		// both floats. easy
+		return evalFloatInfixExpr(op, left, right)
+	}
+
+	// one of them must be a int and the other a float
+	if left.Type() == object.IntType || right.Type() == object.IntType {
+		if left.Type() == object.FloatType {
+			// left is float, right is int.
+			// premote right to float
+			val := right.(*object.Integer).Value
+			right = &object.Float{Value: float64(val)}
+		} else if right.Type() == object.FloatType {
+			// right is float, left is int
+			// premote left to float
+			val := left.(*object.Integer).Value
+			left = &object.Float{Value: float64(val)}
+		}
+
+		return evalFloatInfixExpr(op, left, right)
+	}
+
+	// otherwise 2 objects that don't mismatch
+	return ConstNil
+}
+
+func evalIntegerInfixExpr(op token.Type, left object.Object, right object.Object) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
+
+	switch op {
+	case token.Plus:
+		return &object.Integer{Value: leftVal + rightVal}
+	case token.Minus:
+		return &object.Integer{Value: leftVal - rightVal}
+	case token.Times:
+		return &object.Integer{Value: leftVal * rightVal}
+	case token.Divide:
+		return &object.Integer{Value: leftVal / rightVal}
+	default:
+		return ConstNil
+	}
+}
+
+func evalFloatInfixExpr(op token.Type, left object.Object, right object.Object) object.Object {
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+
+	switch op {
+	case token.Plus:
+		return &object.Float{Value: leftVal + rightVal}
+	case token.Minus:
+		return &object.Float{Value: leftVal - rightVal}
+	case token.Times:
+		return &object.Float{Value: leftVal * rightVal}
+	case token.Divide:
+		return &object.Float{Value: leftVal / rightVal}
+	default:
+		return ConstNil
+	}
 }
 
 func evalBangOperatorExpr(right object.Object) object.Object {
