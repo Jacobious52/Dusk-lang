@@ -60,7 +60,36 @@ func boolToBoolean(b bool) *object.Boolean {
 
 func evalPrefixExpr(op token.Type, right object.Object) object.Object {
 	switch op {
-
+	case token.Bang:
+		return evalBangOperatorExpr(right)
+	case token.Minus:
+		return evalMinusPrefixOperatorExpr(right)
 	}
 	return nil
+}
+
+func evalBangOperatorExpr(right object.Object) object.Object {
+	switch right {
+	case ConstTrue:
+		return ConstFalse
+	case ConstFalse:
+		return ConstTrue
+	case ConstNil:
+		return ConstTrue
+	default:
+		return ConstFalse
+	}
+}
+
+func evalMinusPrefixOperatorExpr(right object.Object) object.Object {
+	switch right.Type() {
+	case object.IntType:
+		v := right.(*object.Integer).Value
+		return &object.Integer{Value: -v}
+	case object.FloatType:
+		v := right.(*object.Float).Value
+		return &object.Float{Value: -v}
+	default:
+		return ConstNil
+	}
 }
