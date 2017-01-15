@@ -53,6 +53,10 @@ func (t Type) String() string {
 	switch t {
 	case Assign:
 		return "="
+	case Equal:
+		return "=="
+	case NotEqual:
+		return "!="
 	case Plus:
 		return "+"
 	case Minus:

@@ -82,6 +82,7 @@ func (bs *BlockStatement) TokenLiteral() string {
 	return bs.Token.Literal
 }
 
+// TokenLiteral for CallExpression
 func (c *CallExpression) TokenLiteral() string {
 	return c.Token.Literal
 }
@@ -122,7 +123,7 @@ func (p *PrefixExpression) String() string {
 	var b bytes.Buffer
 
 	b.WriteByte('(')
-	b.WriteString(p.Operator)
+	b.WriteString(p.Operator.String())
 	b.WriteString(p.Right.String())
 	b.WriteByte(')')
 
@@ -136,7 +137,7 @@ func (i *InfixExpression) String() string {
 	b.WriteString("(")
 	b.WriteString(i.Left.String())
 	b.WriteByte(' ')
-	b.WriteString(i.Operator)
+	b.WriteString(i.Operator.String())
 	b.WriteByte(' ')
 	b.WriteString(i.Right.String())
 	b.WriteString(")")

@@ -63,7 +63,7 @@ type ExpressionStatement struct {
 // PrefixExpression ::= Operator Expression
 type PrefixExpression struct {
 	Token    token.Token // prefix token ! & -
-	Operator string
+	Operator token.Type
 	Right    Expression
 }
 
@@ -71,7 +71,7 @@ type PrefixExpression struct {
 type InfixExpression struct {
 	Token    token.Token // The operator
 	Left     Expression
-	Operator string
+	Operator token.Type
 	Right    Expression
 }
 

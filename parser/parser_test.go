@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"jacob/black/ast"
 	"jacob/black/lexer"
+	"jacob/black/token"
 	"strconv"
 	"testing"
 )
@@ -113,15 +114,15 @@ func TestIdentifierExpression(t *testing.T) {
 func TestParsingPrefixExpressions(t *testing.T) {
 	prefixTests := []struct {
 		input    string
-		operator string
+		operator token.Type
 		value    interface{}
 	}{
-		{"!5;", "!", 5},
-		{"-15;", "-", 15},
-		{"!foobar;", "!", "foobar"},
-		{"-foobar;", "-", "foobar"},
-		{"!true;", "!", true},
-		{"!false;", "!", false},
+		{"!5;", token.Bang, 5},
+		{"-15;", token.Minus, 15},
+		{"!foobar;", token.Bang, "foobar"},
+		{"-foobar;", token.Minus, "foobar"},
+		{"!true;", token.Bang, true},
+		{"!false;", token.Bang, false},
 	}
 
 	for _, tt := range prefixTests {
@@ -159,28 +160,28 @@ func TestParsingInfixExpressions(t *testing.T) {
 	infixTests := []struct {
 		input      string
 		leftValue  interface{}
-		operator   string
+		operator   token.Type
 		rightValue interface{}
 	}{
-		{"5 + 5;", 5, "+", 5},
-		{"5 - 5;", 5, "-", 5},
-		{"5 * 5;", 5, "*", 5},
-		{"5 / 5;", 5, "/", 5},
-		{"5 > 5;", 5, ">", 5},
-		{"5 < 5;", 5, "<", 5},
-		{"5 == 5;", 5, "==", 5},
-		{"5 != 5;", 5, "!=", 5},
-		{"foobar + barfoo;", "foobar", "+", "barfoo"},
-		{"foobar - barfoo;", "foobar", "-", "barfoo"},
-		{"foobar * barfoo;", "foobar", "*", "barfoo"},
-		{"foobar / barfoo;", "foobar", "/", "barfoo"},
-		{"foobar > barfoo;", "foobar", ">", "barfoo"},
-		{"foobar < barfoo;", "foobar", "<", "barfoo"},
-		{"foobar == barfoo;", "foobar", "==", "barfoo"},
-		{"foobar != barfoo;", "foobar", "!=", "barfoo"},
-		{"true == true", true, "==", true},
-		{"true != false", true, "!=", false},
-		{"false == false", false, "==", false},
+		{"5 + 5;", 5, token.Plus, 5},
+		{"5 - 5;", 5, token.Minus, 5},
+		{"5 * 5;", 5, token.Times, 5},
+		{"5 / 5;", 5, token.Divide, 5},
+		{"5 > 5;", 5, token.Greater, 5},
+		{"5 < 5;", 5, token.Less, 5},
+		{"5 == 5;", 5, token.Equal, 5},
+		{"5 != 5;", 5, token.NotEqual, 5},
+		{"foobar + barfoo;", "foobar", token.Plus, "barfoo"},
+		{"foobar - barfoo;", "foobar", token.Minus, "barfoo"},
+		{"foobar * barfoo;", "foobar", token.Times, "barfoo"},
+		{"foobar / barfoo;", "foobar", token.Divide, "barfoo"},
+		{"foobar > barfoo;", "foobar", token.Greater, "barfoo"},
+		{"foobar < barfoo;", "foobar", token.Less, "barfoo"},
+		{"foobar == barfoo;", "foobar", token.Equal, "barfoo"},
+		{"foobar != barfoo;", "foobar", token.NotEqual, "barfoo"},
+		{"true == true", true, token.Equal, true},
+		{"true != false", true, token.NotEqual, false},
+		{"false == false", false, token.Equal, false},
 	}
 
 	for _, tt := range infixTests {
@@ -406,7 +407,7 @@ func TestIfExpression(t *testing.T) {
 				stmt.Expression)
 		}
 
-		if !testInfixExpression(t, exp.Cond, "x", "<", "y") {
+		if !testInfixExpression(t, exp.Cond, "x", token.Less, "y") {
 			return
 		}
 
@@ -457,7 +458,7 @@ func TestIfElseExpression(t *testing.T) {
 			t.Fatalf("stmt.Expression is not ast.IfExpression. got=%T", stmt.Expression)
 		}
 
-		if !testInfixExpression(t, exp.Cond, "x", "<", "y") {
+		if !testInfixExpression(t, exp.Cond, "x", token.Less, "y") {
 			return
 		}
 
@@ -540,7 +541,7 @@ func TestFunctionLiteralParsing(t *testing.T) {
 				function.Body.Statements[0])
 		}
 
-		testInfixExpression(t, bodyStmt.Expression, "x", "+", "y")
+		testInfixExpression(t, bodyStmt.Expression, "x", token.Plus, "y")
 	}
 }
 
@@ -611,8 +612,8 @@ func TestCallExpressionParsing(t *testing.T) {
 	}
 
 	testLiteralExpression(t, exp.Args[0], 1)
-	testInfixExpression(t, exp.Args[1], 2, "*", 3)
-	testInfixExpression(t, exp.Args[2], 4, "+", 5)
+	testInfixExpression(t, exp.Args[1], 2, token.Times, 3)
+	testInfixExpression(t, exp.Args[2], 4, token.Plus, 5)
 }
 
 func TestCallExpressionParameterParsing(t *testing.T) {
@@ -700,7 +701,7 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 }
 
 func testInfixExpression(t *testing.T, exp ast.Expression, left interface{},
-	operator string, right interface{}) bool {
+	operator token.Type, right interface{}) bool {
 
 	opExp, ok := exp.(*ast.InfixExpression)
 	if !ok {

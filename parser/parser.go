@@ -255,7 +255,7 @@ func (p *Parser) parseBangExpression() ast.Expression {
 }
 
 func (p *Parser) parsePrefixExpression() ast.Expression {
-	expr := &ast.PrefixExpression{Token: p.current, Operator: p.current.Literal}
+	expr := &ast.PrefixExpression{Token: p.current, Operator: p.current.Type}
 
 	p.nextToken()
 	expr.Right = p.parseExpression(prefix)
@@ -264,7 +264,7 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 }
 
 func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
-	expr := &ast.InfixExpression{Token: p.current, Left: left, Operator: p.current.Literal}
+	expr := &ast.InfixExpression{Token: p.current, Left: left, Operator: p.current.Type}
 
 	prec := p.currentPrecedence()
 	p.nextToken()
