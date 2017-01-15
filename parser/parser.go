@@ -290,7 +290,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 
 	// check if with mult statement or single statement
 	if !(p.nextIs(token.LBrace) || p.nextIs(token.Arrow)) {
-		p.newError("expected '{' or '->' following let statement, got '%s' instead")
+		p.newError("expected '{' or '->' following if statement, got '%s' instead")
 		return nil
 	}
 
@@ -302,6 +302,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 		p.nextToken()
 		// current is else. do same check as before
 		if !(p.nextIs(token.LBrace) || p.nextIs(token.Arrow)) {
+			p.newError("expected '{' or '->' following else statement, got '%s' instead")
 			return nil
 		}
 
@@ -463,7 +464,6 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 
 	msg := fmt.Sprintf("could not parse '%s' as Integer", p.current.Literal)
 	p.newError(msg)
-
 	return nil
 }
 
@@ -477,7 +477,6 @@ func (p *Parser) parseFloatLiteral() ast.Expression {
 
 	msg := fmt.Sprintf("could not parse '%s' as Float", p.current.Literal)
 	p.newError(msg)
-
 	return nil
 }
 
