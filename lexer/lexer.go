@@ -196,7 +196,7 @@ func (l *Lexer) readIdentifier() token.Token {
 	id := string(l.buff[p:l.curr])
 
 	l.last = token.Identifier
-	return token.Token{token.LookupIdenifier(id), id, pos}
+	return token.Token{Type: token.LookupIdenifier(id), Literal: id, Pos: pos}
 }
 
 // TODO: make parse double and int
@@ -219,7 +219,7 @@ func (l *Lexer) readNumber() token.Token {
 		l.last = token.Float
 	}
 
-	return token.Token{l.last, string(l.buff[p:l.curr]), pos}
+	return token.Token{Type: l.last, Literal: string(l.buff[p:l.curr]), Pos: pos}
 }
 
 func (l *Lexer) nextChar() {

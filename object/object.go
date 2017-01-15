@@ -6,11 +6,18 @@ import "fmt"
 type Type int
 
 const (
-	NilType     Type = iota // NilType nil
-	IntType                 // IntType int64
-	FloatType               // FloatType float64
-	BooleanType             // BooleanType bool
-	StringType              // StringType string
+	// NilType nil
+	NilType Type = iota
+	// IntType int64
+	IntType
+	// FloatType float64
+	FloatType
+	// BooleanType bool
+	BooleanType
+	// StringType string
+	StringType
+	// ReturnType value
+	ReturnType
 )
 
 // String for type
@@ -80,6 +87,7 @@ func (b *Boolean) Type() Type {
 	return BooleanType
 }
 
+// Nil -  No value
 type Nil struct{}
 
 // String for Boolean
@@ -90,4 +98,19 @@ func (n *Nil) String() string {
 // Type for Nil
 func (n *Nil) Type() Type {
 	return NilType
+}
+
+// ReturnValue wrapper for a value returned
+type ReturnValue struct {
+	Value Object
+}
+
+// String for Return
+func (r *ReturnValue) String() string {
+	return r.Value.String()
+}
+
+// Type for Return
+func (r *ReturnValue) Type() Type {
+	return ReturnType
 }

@@ -176,7 +176,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 		return nil
 	}
 
-	let.Name = &ast.Identifier{p.current, p.current.Literal}
+	let.Name = &ast.Identifier{Token: p.current, Value: p.current.Literal}
 
 	if !p.expectNext(token.Assign) {
 		return nil
@@ -350,7 +350,7 @@ func (p *Parser) parseFunctionParams() []*ast.Identifier {
 	if !p.expectNext(token.Identifier) {
 		return nil
 	}
-	ids = append(ids, &ast.Identifier{p.current, p.current.Literal})
+	ids = append(ids, &ast.Identifier{Token: p.current, Value: p.current.Literal})
 
 	// keep getting params until no more commas
 	for p.nextIs(token.Comma) {
@@ -361,7 +361,7 @@ func (p *Parser) parseFunctionParams() []*ast.Identifier {
 		if !p.expectNext(token.Identifier) {
 			return nil
 		}
-		ids = append(ids, &ast.Identifier{p.current, p.current.Literal})
+		ids = append(ids, &ast.Identifier{Token: p.current, Value: p.current.Literal})
 	}
 
 	// must end with bar
@@ -481,7 +481,7 @@ func (p *Parser) parseFloatLiteral() ast.Expression {
 }
 
 func (p *Parser) parseBooleanExpression() ast.Expression {
-	return &ast.BooleanLiteral{p.current, p.currentIs(token.True)}
+	return &ast.BooleanLiteral{Token: p.current, Value: p.currentIs(token.True)}
 }
 
 func (p *Parser) currentIs(t token.Type) bool {
