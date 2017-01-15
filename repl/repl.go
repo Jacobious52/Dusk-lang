@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"jacob/black/eval"
 	"jacob/black/lexer"
 	"jacob/black/parser"
 	"strings"
@@ -101,8 +102,12 @@ func Run(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		fmt.Fprintln(out, "", color(prompt, magneta), "\t", color(program.String(), yellow))
-		fmt.Fprint(out, "\n")
+		result := eval.Eval(program)
+
+		if result != nil {
+			fmt.Fprintln(out, "", color(prompt, magneta), "\t", color(result.String(), yellow))
+			fmt.Fprint(out, "\n")
+		}
 	}
 }
 
