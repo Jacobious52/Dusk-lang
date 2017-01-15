@@ -27,6 +27,7 @@ const (
 	lowest     precedence = (iota + 1)
 	equals                // == !=
 	inequality            // < >
+	assign                // =
 	sum                   // + -
 	product               // * /
 	prefix                // -X or !X
@@ -42,6 +43,9 @@ var precedences = map[token.Type]precedence{
 	token.Greater:  inequality,
 	token.Divide:   product,
 	token.Times:    product,
+	token.LParen:   call,
+	token.Bang:     call,
+	token.Assign:   assign,
 }
 
 // Parser parses into a ast from the lexer
@@ -80,8 +84,11 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.Times, p.parseInfixExpression)
 	p.registerInfix(token.Equal, p.parseInfixExpression)
 	p.registerInfix(token.NotEqual, p.parseInfixExpression)
+	p.registerInfix(token.Assign, p.parseInfixExpression)
 	p.registerInfix(token.Less, p.parseInfixExpression)
 	p.registerInfix(token.Greater, p.parseInfixExpression)
+	p.registerInfix(token.LParen, p.parseCallExpression)
+	p.registerInfix(token.Bang, p.parseCallExpression)
 
 	p.nextToken()
 	p.nextToken()
@@ -400,6 +407,46 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	}
 
 	return block
+}
+
+func (p *Parser) parseCallExpression(f ast.Expression) ast.Expression {
+	call := &ast.CallExpression{Token: p.current, Func: f}
+	call.Args = p.parseCallArgs()
+	return call
+}
+
+func (p *Parser) parseCallArgs() []ast.Expression {
+	args := []ast.Expression{}
+
+	// capture empty args ! and just return
+	if p.currentIs(token.Bang) {
+		return args
+	}
+
+	// '()' empty params
+	if p.nextIs(token.RParen) {
+		p.nextToken()
+		return args
+	}
+	p.nextToken()
+
+	// that means at least one arg. get it
+	args = append(args, p.parseExpression(lowest))
+
+	// keep getting params until no more commas
+	for p.nextIs(token.Comma) {
+		// swollow comma
+		p.nextToken()
+		p.nextToken()
+		args = append(args, p.parseExpression(lowest))
+	}
+
+	// must end with )
+	if !p.expectNext(token.RParen) {
+		return nil
+	}
+
+	return args
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {

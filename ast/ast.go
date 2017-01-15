@@ -47,6 +47,13 @@ type BlockStatement struct {
 	Statements []Statement
 }
 
+// CallExpression ::= Identifier ('|' (Expression | (Expression ',')?)* '|' | '!')
+type CallExpression struct {
+	Token token.Token // the | or ! token
+	Func  Expression  // either an Identifier or function literal
+	Args  []Expression
+}
+
 // ExpressionStatement ::= (IntegerLiteral | FloatLiteral | StringLiteral | Operator | Identifier) Expression?
 type ExpressionStatement struct {
 	Token      token.Token // first token of the expression

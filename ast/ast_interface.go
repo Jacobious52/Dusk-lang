@@ -82,6 +82,10 @@ func (bs *BlockStatement) TokenLiteral() string {
 	return bs.Token.Literal
 }
 
+func (c *CallExpression) TokenLiteral() string {
+	return c.Token.Literal
+}
+
 // **---String-implementations---** //
 
 // String for Program
@@ -211,6 +215,22 @@ func (bs *BlockStatement) String() string {
 	return b.String()
 }
 
+func (c *CallExpression) String() string {
+	var b bytes.Buffer
+
+	args := []string{}
+	for _, c := range c.Args {
+		args = append(args, c.String())
+	}
+
+	b.WriteString(c.Func.String())
+	b.WriteByte('(')
+	b.WriteString(strings.Join(args, ", "))
+	b.WriteByte(')')
+
+	return b.String()
+}
+
 // String for Identifier
 func (i *Identifier) String() string {
 	return i.Value
@@ -268,3 +288,4 @@ func (i *InfixExpression) expressionNode()  {}
 func (b *BooleanLiteral) expressionNode()   {}
 func (f *IfExpression) expressionNode()     {}
 func (f *FunctionLiteral) expressionNode()  {}
+func (c *CallExpression) expressionNode()   {}

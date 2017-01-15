@@ -304,19 +304,27 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 			"!(true == true)",
 			"(!(true == true))",
 		},
-		/*
-			{
-				"a + add(b * c) + d",
-				"((a + add((b * c))) + d)",
-			},
-			{
-				"add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))",
-				"add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
-			},
-			{
-				"add(a + b + c * d / f + g)",
-				"add((((a + b) + ((c * d) / f)) + g))",
-			},*/
+
+		{
+			"a + add(b * c) + d",
+			"((a + add((b * c))) + d)",
+		},
+		{
+			"add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))",
+			"add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
+		},
+		{
+			"add(a + b + c * d / f + g)",
+			"add((((a + b) + ((c * d) / f)) + g))",
+		},
+		{
+			"a = 6 + 5",
+			"(a = (6 + 5))",
+		},
+		{
+			"a == b = 5",
+			"(a == (b = 5))",
+		},
 	}
 
 	for _, tt := range tests {
@@ -569,7 +577,6 @@ func TestFunctionParameterParsing(t *testing.T) {
 	}
 }
 
-/*
 func TestCallExpressionParsing(t *testing.T) {
 	input := "add(1, 2 * 3, 4 + 5);"
 
@@ -595,20 +602,19 @@ func TestCallExpressionParsing(t *testing.T) {
 			stmt.Expression)
 	}
 
-	if !testIdentifier(t, exp.Function, "add") {
+	if !testIdentifier(t, exp.Func, "add") {
 		return
 	}
 
-	if len(exp.Arguments) != 3 {
-		t.Fatalf("wrong length of arguments. got=%d", len(exp.Arguments))
+	if len(exp.Args) != 3 {
+		t.Fatalf("wrong length of arguments. got=%d", len(exp.Args))
 	}
 
-	testLiteralExpression(t, exp.Arguments[0], 1)
-	testInfixExpression(t, exp.Arguments[1], 2, "*", 3)
-	testInfixExpression(t, exp.Arguments[2], 4, "+", 5)
+	testLiteralExpression(t, exp.Args[0], 1)
+	testInfixExpression(t, exp.Args[1], 2, "*", 3)
+	testInfixExpression(t, exp.Args[2], 4, "+", 5)
 }
-*/
-/*
+
 func TestCallExpressionParameterParsing(t *testing.T) {
 	tests := []struct {
 		input         string
@@ -617,6 +623,11 @@ func TestCallExpressionParameterParsing(t *testing.T) {
 	}{
 		{
 			input:         "add();",
+			expectedIdent: "add",
+			expectedArgs:  []string{},
+		},
+		{
+			input:         "add!;",
 			expectedIdent: "add",
 			expectedArgs:  []string{},
 		},
@@ -645,24 +656,23 @@ func TestCallExpressionParameterParsing(t *testing.T) {
 				stmt.Expression)
 		}
 
-		if !testIdentifier(t, exp.Function, tt.expectedIdent) {
+		if !testIdentifier(t, exp.Func, tt.expectedIdent) {
 			return
 		}
 
-		if len(exp.Arguments) != len(tt.expectedArgs) {
+		if len(exp.Args) != len(tt.expectedArgs) {
 			t.Fatalf("wrong number of arguments. want=%d, got=%d",
-				len(tt.expectedArgs), len(exp.Arguments))
+				len(tt.expectedArgs), len(exp.Args))
 		}
 
 		for i, arg := range tt.expectedArgs {
-			if exp.Arguments[i].String() != arg {
+			if exp.Args[i].String() != arg {
 				t.Errorf("argument %d wrong. want=%q, got=%q", i,
-					arg, exp.Arguments[i].String())
+					arg, exp.Args[i].String())
 			}
 		}
 	}
 }
-*/
 
 func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 	if s.TokenLiteral() != "let" {
