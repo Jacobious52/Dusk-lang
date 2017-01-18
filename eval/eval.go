@@ -1,6 +1,7 @@
 package eval
 
 import (
+	"fmt"
 	"jacob/black/ast"
 	"jacob/black/object"
 	"jacob/black/token"
@@ -15,6 +16,17 @@ var (
 	ConstNil = &object.Nil{}
 )
 
+func newError(pos token.Position, format string, v ...interface{}) *object.Error {
+	return &object.Error{Message: fmt.Sprintf(format, v...), Pos: pos}
+}
+
+func isError(o object.Object) bool {
+	if o != nil {
+		return o.Type() == object.ErrorType
+	}
+	return false
+}
+
 // Eval evaluates the program node and returns an object as a result
 func Eval(node ast.Node) object.Object {
 	switch node := node.(type) {
@@ -23,7 +35,11 @@ func Eval(node ast.Node) object.Object {
 	case *ast.Program:
 		return evalProgram(node)
 	case *ast.ReturnStatement:
-		return &object.ReturnValue{Value: Eval(node.Value)}
+		val := Eval(node.Value)
+		if isError(val) {
+			return val
+		}
+		return &object.ReturnValue{Value: val}
 	case *ast.BlockStatement:
 		return evalBlockStatement(node)
 	case *ast.ExpressionStatement:
@@ -32,11 +48,20 @@ func Eval(node ast.Node) object.Object {
 		// expressions
 	case *ast.PrefixExpression:
 		right := Eval(node.Right)
-		return evalPrefixExpr(node.Operator, right)
+		if isError(right) {
+			return right
+		}
+		return evalPrefixExpr(node.Token, right)
 	case *ast.InfixExpression:
 		left := Eval(node.Left)
+		if isError(left) {
+			return left
+		}
 		right := Eval(node.Right)
-		return evalInfixExpr(node.Operator, left, right)
+		if isError(right) {
+			return right
+		}
+		return evalInfixExpr(node.Token, left, right)
 	case *ast.IfExpression:
 		return evalIfExpr(node)
 
@@ -57,8 +82,15 @@ func evalProgram(program *ast.Program) object.Object {
 	for _, s := range program.Statements {
 		result = Eval(s)
 
-		if result.Type() == object.ReturnType {
-			return result.(*object.ReturnValue).Value
+		if result != nil {
+			// pass up the return type to the top level
+			switch result.Type() {
+			case object.ReturnType:
+				// unwrap the return value
+				return result.(*object.ReturnValue).Value
+			case object.ErrorType:
+				return result.(*object.Error)
+			}
 		}
 	}
 
@@ -71,8 +103,10 @@ func evalBlockStatement(block *ast.BlockStatement) object.Object {
 	for _, s := range block.Statements {
 		result = Eval(s)
 
-		if result != nil && result.Type() == object.ReturnType {
-			return result
+		if result != nil {
+			if result.Type() == object.ReturnType || result.Type() == object.ErrorType {
+				return result
+			}
 		}
 	}
 
@@ -81,6 +115,10 @@ func evalBlockStatement(block *ast.BlockStatement) object.Object {
 
 func evalIfExpr(node *ast.IfExpression) object.Object {
 	cond := Eval(node.Cond)
+
+	if isError(cond) {
+		return cond
+	}
 
 	if isTruthy(cond) {
 		return Eval(node.Do)
@@ -120,17 +158,24 @@ func boolToBoolean(b bool) *object.Boolean {
 	return ConstFalse
 }
 
-func evalPrefixExpr(op token.Type, right object.Object) object.Object {
-	switch op {
+func evalPrefixExpr(op token.Token, right object.Object) object.Object {
+	switch op.Type {
 	case token.Bang:
 		return evalBangOperatorExpr(right)
 	case token.Minus:
-		return evalMinusPrefixOperatorExpr(right)
+		return evalMinusPrefixOperatorExpr(op.Pos, right)
+	default:
+		return newError(op.Pos, "unknown operator '%s' for type '%s'", op, right.Type())
 	}
-	return nil
 }
 
-func evalInfixExpr(op token.Type, left object.Object, right object.Object) object.Object {
+func evalInfixExpr(op token.Token, left object.Object, right object.Object) object.Object {
+
+	if !left.CanApply(op.Type, right.Type()) {
+		return newError(op.Pos, "cannot apply operator '%s' for type '%s' and '%s'", op, left.Type(), right.Type())
+	}
+
+	// test and convert int to float if needed
 	if left.Type() == object.IntType && right.Type() == object.IntType {
 		// both ints. easy
 		return evalIntegerInfixExpr(op, left, right)
@@ -159,21 +204,21 @@ func evalInfixExpr(op token.Type, left object.Object, right object.Object) objec
 	}
 
 	// compare actual runtime object
-	if op == token.Equal {
+	if op.Type == token.Equal {
 		return boolToBoolean(left == right)
-	} else if op == token.NotEqual {
+	} else if op.Type == token.NotEqual {
 		return boolToBoolean(left != right)
 	}
 
 	// otherwise 2 objects that don't match
-	return nil
+	return newError(op.Pos, "unknown operator '%s' for type '%s' and '%s'", op, left.Type(), right.Type())
 }
 
-func evalIntegerInfixExpr(op token.Type, left object.Object, right object.Object) object.Object {
+func evalIntegerInfixExpr(op token.Token, left object.Object, right object.Object) object.Object {
 	leftVal := left.(*object.Integer).Value
 	rightVal := right.(*object.Integer).Value
 
-	switch op {
+	switch op.Type {
 	case token.Plus:
 		return &object.Integer{Value: leftVal + rightVal}
 	case token.Minus:
@@ -191,15 +236,15 @@ func evalIntegerInfixExpr(op token.Type, left object.Object, right object.Object
 	case token.NotEqual:
 		return boolToBoolean(leftVal != rightVal)
 	default:
-		return ConstNil
+		return newError(op.Pos, "unknown operator '%s' for type '%s' and '%s'", op.Type, left.Type(), right.Type())
 	}
 }
 
-func evalFloatInfixExpr(op token.Type, left object.Object, right object.Object) object.Object {
+func evalFloatInfixExpr(op token.Token, left object.Object, right object.Object) object.Object {
 	leftVal := left.(*object.Float).Value
 	rightVal := right.(*object.Float).Value
 
-	switch op {
+	switch op.Type {
 	case token.Plus:
 		return &object.Float{Value: leftVal + rightVal}
 	case token.Minus:
@@ -217,7 +262,7 @@ func evalFloatInfixExpr(op token.Type, left object.Object, right object.Object) 
 	case token.NotEqual:
 		return boolToBoolean(leftVal != rightVal)
 	default:
-		return ConstNil
+		return newError(op.Pos, "unknown operator '%s' for type '%s' and '%s'", op.Type, left.Type(), right.Type())
 	}
 }
 
@@ -234,7 +279,7 @@ func evalBangOperatorExpr(right object.Object) object.Object {
 	}
 }
 
-func evalMinusPrefixOperatorExpr(right object.Object) object.Object {
+func evalMinusPrefixOperatorExpr(pos token.Position, right object.Object) object.Object {
 	switch right.Type() {
 	case object.IntType:
 		v := right.(*object.Integer).Value
@@ -243,6 +288,6 @@ func evalMinusPrefixOperatorExpr(right object.Object) object.Object {
 		v := right.(*object.Float).Value
 		return &object.Float{Value: -v}
 	default:
-		return ConstNil
+		return newError(pos, "unknown operator '-' for type '%s'", right.Type())
 	}
 }

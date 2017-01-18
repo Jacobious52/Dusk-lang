@@ -1,6 +1,9 @@
 package object
 
-import "fmt"
+import (
+	"fmt"
+	"jacob/black/token"
+)
 
 // Type is a flag for the type of object
 type Type int
@@ -18,6 +21,8 @@ const (
 	StringType
 	// ReturnType value
 	ReturnType
+	// ErrorType runtime error
+	ErrorType
 )
 
 // String for type
@@ -31,6 +36,10 @@ func (t Type) String() string {
 		return "bool"
 	case StringType:
 		return "string"
+	case ReturnType:
+		return "return_value"
+	case ErrorType:
+		return "error"
 	default:
 		return "unknown"
 	}
@@ -40,6 +49,7 @@ func (t Type) String() string {
 type Object interface {
 	Type() Type
 	String() string
+	CanApply(token.Type, Type) bool
 }
 
 // Integer is a int64
@@ -57,6 +67,19 @@ func (i *Integer) Type() Type {
 	return IntType
 }
 
+// CanApply for this type
+func (i *Integer) CanApply(op token.Type, t Type) bool {
+	switch t {
+	case IntType, FloatType:
+		return true
+	default:
+		if op == token.Equal || op == token.NotEqual {
+			return true
+		}
+		return false
+	}
+}
+
 // Float is a float64
 type Float struct {
 	Value float64
@@ -70,6 +93,16 @@ func (f *Float) String() string {
 // Type for Float
 func (f *Float) Type() Type {
 	return FloatType
+}
+
+// CanApply for this type
+func (f *Float) CanApply(op token.Type, t Type) bool {
+	switch t {
+	case IntType, FloatType:
+		return true
+	default:
+		return false
+	}
 }
 
 // Boolean is a int64
@@ -87,6 +120,16 @@ func (b *Boolean) Type() Type {
 	return BooleanType
 }
 
+// CanApply for this type
+func (b *Boolean) CanApply(op token.Type, t Type) bool {
+	switch op {
+	case token.Equal, token.NotEqual:
+		return true
+	default:
+		return false
+	}
+}
+
 // Nil -  No value
 type Nil struct{}
 
@@ -98,6 +141,11 @@ func (n *Nil) String() string {
 // Type for Nil
 func (n *Nil) Type() Type {
 	return NilType
+}
+
+// CanApply for this type
+func (n *Nil) CanApply(op token.Type, t Type) bool {
+	return false
 }
 
 // ReturnValue wrapper for a value returned
@@ -113,4 +161,30 @@ func (r *ReturnValue) String() string {
 // Type for Return
 func (r *ReturnValue) Type() Type {
 	return ReturnType
+}
+
+// CanApply for this type
+func (r *ReturnValue) CanApply(op token.Type, t Type) bool {
+	return r.Value.CanApply(op, t)
+}
+
+// Error wrapper for a value returned
+type Error struct {
+	Message string
+	Pos     token.Position
+}
+
+// String for Return
+func (e *Error) String() string {
+	return fmt.Sprintf("%s: %s", e.Pos, e.Message)
+}
+
+// Type for Return
+func (e *Error) Type() Type {
+	return ErrorType
+}
+
+// CanApply for this type
+func (e *Error) CanApply(op token.Type, t Type) bool {
+	return false
 }

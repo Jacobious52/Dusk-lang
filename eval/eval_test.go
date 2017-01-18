@@ -166,7 +166,7 @@ func TestReturnStatements(t *testing.T) {
 		{"ret 10; 9;", 10},
 		{"ret 2 * 5; 9;", 10},
 		{"9; ret 2 * 5; 9;", 10},
-		{"if (10 > 1) { ret 10; }", 10},
+		{"if 10 > 1 { ret 10; }", 10},
 		{
 			`
 if (10 > 1) {
@@ -206,7 +206,6 @@ if (10 > 1) {
 	}
 }
 
-/*
 func TestErrorHandling(t *testing.T) {
 	tests := []struct {
 		input           string
@@ -214,48 +213,48 @@ func TestErrorHandling(t *testing.T) {
 	}{
 		{
 			"5 + true;",
-			"type mismatch: INTEGER + BOOLEAN",
+			"cannot apply operator '+' for type 'int' and 'bool'",
 		},
 		{
 			"5 + true; 5;",
-			"type mismatch: INTEGER + BOOLEAN",
+			"cannot apply operator '+' for type 'int' and 'bool'",
 		},
 		{
 			"-true",
-			"unknown operator: -BOOLEAN",
+			"unknown operator '-' for type 'bool'",
 		},
 		{
 			"true + false;",
-			"unknown operator: BOOLEAN + BOOLEAN",
+			"cannot apply operator '+' for type 'bool' and 'bool'",
 		},
 		{
 			"true + false + true + false;",
-			"unknown operator: BOOLEAN + BOOLEAN",
+			"cannot apply operator '+' for type 'bool' and 'bool'",
 		},
 		{
 			"5; true + false; 5",
-			"unknown operator: BOOLEAN + BOOLEAN",
+			"cannot apply operator '+' for type 'bool' and 'bool'",
 		},
 		{
-			"if (10 > 1) { true + false; }",
-			"unknown operator: BOOLEAN + BOOLEAN",
+			"if 10 > 1 { true + false; }",
+			"cannot apply operator '+' for type 'bool' and 'bool'",
 		},
 		{
 			`
-if (10 > 1) {
-  if (10 > 1) {
-    return true + false;
-  }
+		if 10 > 1 {
+		  if 10 > 1 {
+		    ret true + false;
+		  }
 
-  return 1;
-}
-`,
-			"unknown operator: BOOLEAN + BOOLEAN",
+		  ret 1;
+		}
+		`,
+			"cannot apply operator '+' for type 'bool' and 'bool'",
 		},
-		{
+		/*{
 			"foobar",
 			"identifier not found: foobar",
-		},
+		},*/
 	}
 
 	for _, tt := range tests {
@@ -274,7 +273,7 @@ if (10 > 1) {
 		}
 	}
 }
-*/
+
 /*
 func TestLetStatements(t *testing.T) {
 	tests := []struct {
