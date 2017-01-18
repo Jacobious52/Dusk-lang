@@ -60,6 +60,14 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		return evalPrefixExpr(node.Token, right)
 	case *ast.InfixExpression:
+
+		if node.Operator == token.Assign {
+			if v := evalAssign(node, env); v != nil {
+				return v
+			}
+			return newError(node.Token.Pos, "cannot bind a literal value to a value")
+		}
+
 		left := Eval(node.Left, env)
 		if isError(left) {
 			return left
@@ -327,4 +335,34 @@ func evalIdentifier(id *ast.Identifier, env *object.Environment) object.Object {
 		return val
 	}
 	return newError(id.Token.Pos, "identifier not found: %s", id.Value)
+}
+
+func evalAssign(node *ast.InfixExpression, env *object.Environment) object.Object {
+	// special case = assign operator
+	switch l := node.Left.(type) {
+	case *ast.Identifier:
+		// check if exists already
+		if val, ok := env.Get(l.Value); ok {
+			if isError(val) {
+				return val
+			}
+
+			// eval rhs
+			right := Eval(node.Right, env)
+			if isError(right) {
+				return right
+			}
+
+			// must be same type
+			if val.Type() == right.Type() {
+				env.Set(l.Value, right)
+				return right
+			}
+
+			return newError(l.Token.Pos, "cannot assign variable '%s' of type '%s' to value '%s' of type '%s'", l.Value, val.Type(), right, right.Type())
+		}
+		return newError(l.Token.Pos, "cannot assign value to variable '%s' that does not exist", l.Value)
+	default:
+		return nil
+	}
 }
