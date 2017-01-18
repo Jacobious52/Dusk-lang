@@ -434,7 +434,7 @@ func TestIfExpression(t *testing.T) {
 
 func TestIfElseExpression(t *testing.T) {
 	inputs := []string{`if x < y { x } else { y }`,
-		`if x < y : x else : y`}
+		`if x < y : x else y`}
 
 	for _, input := range inputs {
 		l := lexer.WithString(input, "test")

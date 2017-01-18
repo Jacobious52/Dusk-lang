@@ -326,20 +326,18 @@ func (p *Parser) parseIfExpression() ast.Expression {
 		return nil
 	}
 
-	// goto the { or -> and begin the block statment
+	// goto the { or : and begin the block statment
 	p.nextToken()
 	expr.Do = p.parseBlockStatement()
 
 	if p.nextIs(token.Else) {
 		p.nextToken()
 		// current is else. do same check as before
-		if !(p.nextIs(token.LBrace) || p.nextIs(token.Continue)) {
-			p.newError(fmt.Sprintf("expected '{' or ':' following else statement, got '%s' instead", p.next))
-			return nil
+		if p.nextIs(token.LBrace) {
+			p.nextToken()
 		}
 
-		// goto { or -> and parse block
-		p.nextToken()
+		// goto { or none and parse block
 		expr.Else = p.parseBlockStatement()
 	}
 
@@ -354,7 +352,7 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 
 	// current is |
 	if !(p.nextIs(token.LBrace) || p.nextIs(token.Continue)) {
-		p.newError(fmt.Sprintf("expected '{' or '->' following function literal definition, got '%s' instead", p.next))
+		p.newError(fmt.Sprintf("expected '{' or ':' following function literal definition, got '%s' instead", p.next))
 		return nil
 	}
 	p.nextToken()
