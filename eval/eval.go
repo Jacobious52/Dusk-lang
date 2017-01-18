@@ -5,6 +5,7 @@ import (
 	"jacob/black/ast"
 	"jacob/black/object"
 	"jacob/black/token"
+	"math"
 )
 
 var (
@@ -28,42 +29,48 @@ func isError(o object.Object) bool {
 }
 
 // Eval evaluates the program node and returns an object as a result
-func Eval(node ast.Node) object.Object {
+func Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
 
 	// statements
 	case *ast.Program:
-		return evalProgram(node)
+		return evalProgram(node, env)
+	case *ast.LetStatement:
+		val := Eval(node.Value, env)
+		if isError(val) {
+			return val
+		}
+		env.Set(node.Name.Value, val)
 	case *ast.ReturnStatement:
-		val := Eval(node.Value)
+		val := Eval(node.Value, env)
 		if isError(val) {
 			return val
 		}
 		return &object.ReturnValue{Value: val}
 	case *ast.BlockStatement:
-		return evalBlockStatement(node)
+		return evalBlockStatement(node, env)
 	case *ast.ExpressionStatement:
-		return Eval(node.Expression)
+		return Eval(node.Expression, env)
 
 		// expressions
 	case *ast.PrefixExpression:
-		right := Eval(node.Right)
+		right := Eval(node.Right, env)
 		if isError(right) {
 			return right
 		}
 		return evalPrefixExpr(node.Token, right)
 	case *ast.InfixExpression:
-		left := Eval(node.Left)
+		left := Eval(node.Left, env)
 		if isError(left) {
 			return left
 		}
-		right := Eval(node.Right)
+		right := Eval(node.Right, env)
 		if isError(right) {
 			return right
 		}
 		return evalInfixExpr(node.Token, left, right)
 	case *ast.IfExpression:
-		return evalIfExpr(node)
+		return evalIfExpr(node, env)
 
 		// literals
 	case *ast.IntegerLiteral:
@@ -72,15 +79,18 @@ func Eval(node ast.Node) object.Object {
 		return &object.Float{Value: node.Value}
 	case *ast.BooleanLiteral:
 		return boolToBoolean(node.Value)
+
+	case *ast.Identifier:
+		return evalIdentifier(node, env)
 	}
 	return nil
 }
 
-func evalProgram(program *ast.Program) object.Object {
+func evalProgram(program *ast.Program, env *object.Environment) object.Object {
 	var result object.Object
 
 	for _, s := range program.Statements {
-		result = Eval(s)
+		result = Eval(s, env)
 
 		if result != nil {
 			// pass up the return type to the top level
@@ -97,11 +107,11 @@ func evalProgram(program *ast.Program) object.Object {
 	return result
 }
 
-func evalBlockStatement(block *ast.BlockStatement) object.Object {
+func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) object.Object {
 	var result object.Object
 
 	for _, s := range block.Statements {
-		result = Eval(s)
+		result = Eval(s, env)
 
 		if result != nil {
 			if result.Type() == object.ReturnType || result.Type() == object.ErrorType {
@@ -113,17 +123,17 @@ func evalBlockStatement(block *ast.BlockStatement) object.Object {
 	return result
 }
 
-func evalIfExpr(node *ast.IfExpression) object.Object {
-	cond := Eval(node.Cond)
+func evalIfExpr(node *ast.IfExpression, env *object.Environment) object.Object {
+	cond := Eval(node.Cond, env)
 
 	if isError(cond) {
 		return cond
 	}
 
 	if isTruthy(cond) {
-		return Eval(node.Do)
+		return Eval(node.Do, env)
 	} else if node.Else != nil {
-		return Eval(node.Else)
+		return Eval(node.Else, env)
 	}
 
 	return ConstNil
@@ -226,7 +236,17 @@ func evalIntegerInfixExpr(op token.Token, left object.Object, right object.Objec
 	case token.Times:
 		return &object.Integer{Value: leftVal * rightVal}
 	case token.Divide:
+		if rightVal == 0 {
+			return newError(op.Pos, "cannot divide %d by 0", leftVal)
+		}
 		return &object.Integer{Value: leftVal / rightVal}
+	case token.Exp:
+		return &object.Integer{Value: int64(math.Pow(float64(leftVal), float64(rightVal)))}
+	case token.Mod:
+		if rightVal == 0 {
+			return newError(op.Pos, "cannot modulo %d by 0", leftVal)
+		}
+		return &object.Integer{Value: leftVal % rightVal}
 	case token.Less:
 		return boolToBoolean(leftVal < rightVal)
 	case token.Greater:
@@ -252,7 +272,17 @@ func evalFloatInfixExpr(op token.Token, left object.Object, right object.Object)
 	case token.Times:
 		return &object.Float{Value: leftVal * rightVal}
 	case token.Divide:
+		if rightVal == 0 {
+			return newError(op.Pos, "cannot divide %d by 0", leftVal)
+		}
 		return &object.Float{Value: leftVal / rightVal}
+	case token.Exp:
+		return &object.Float{Value: math.Pow(leftVal, rightVal)}
+	case token.Mod:
+		if rightVal == 0 {
+			return newError(op.Pos, "cannot modulo %d by 0", leftVal)
+		}
+		return &object.Float{Value: math.Mod(leftVal, rightVal)}
 	case token.Less:
 		return boolToBoolean(leftVal < rightVal)
 	case token.Greater:
@@ -290,4 +320,11 @@ func evalMinusPrefixOperatorExpr(pos token.Position, right object.Object) object
 	default:
 		return newError(pos, "unknown operator '-' for type '%s'", right.Type())
 	}
+}
+
+func evalIdentifier(id *ast.Identifier, env *object.Environment) object.Object {
+	if val, ok := env.Get(id.Value); ok {
+		return val
+	}
+	return newError(id.Token.Pos, "identifier not found: %s", id.Value)
 }

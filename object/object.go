@@ -168,18 +168,18 @@ func (r *ReturnValue) CanApply(op token.Type, t Type) bool {
 	return r.Value.CanApply(op, t)
 }
 
-// Error wrapper for a value returned
+// Error for runrime error
 type Error struct {
 	Message string
 	Pos     token.Position
 }
 
-// String for Return
+// String for Error
 func (e *Error) String() string {
 	return fmt.Sprintf("%s: %s", e.Pos, e.Message)
 }
 
-// Type for Return
+// Type for Error
 func (e *Error) Type() Type {
 	return ErrorType
 }

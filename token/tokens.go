@@ -16,6 +16,8 @@ const (
 	Minus   // Minus -
 	Times   // Times *
 	Divide  // Divide /
+	Exp     // Exp ^
+	Mod     // Mod %
 	Bang    // Bang !
 	Less    // Less <
 	Greater // Greater >
@@ -65,6 +67,10 @@ func (t Type) String() string {
 		return "*"
 	case Divide:
 		return "/"
+	case Exp:
+		return "^"
+	case Mod:
+		return "%"
 	case Bang:
 		return "!"
 	case Less:
@@ -90,33 +96,33 @@ func (t Type) String() string {
 	case Comma:
 		return ","
 	case Terminator:
-		return "Terminator"
+		return "terminator"
 	case EOF:
 		return "EOF"
 	case Identifier:
-		return "Identifier"
+		return "identifier"
 	case Int:
-		return "Int"
+		return "int"
 	case Float:
-		return "Float"
+		return "float"
 	case String:
-		return "String"
+		return "string"
 	case Let:
-		return "Let"
+		return "let"
 	case If:
-		return "If"
+		return "if"
 	case Else:
-		return "Else"
+		return "else"
 	case False:
-		return "False"
+		return "false"
 	case True:
-		return "True"
+		return "true"
 	case For:
-		return "For"
+		return "for"
 	case Return:
-		return "Return"
+		return "ret"
 	default:
-		return "Unknown"
+		return "unknown"
 	}
 }
 

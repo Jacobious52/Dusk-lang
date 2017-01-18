@@ -7,6 +7,7 @@ import (
 	"io"
 	"jacob/black/eval"
 	"jacob/black/lexer"
+	"jacob/black/object"
 	"jacob/black/parser"
 	"strings"
 )
@@ -38,6 +39,8 @@ func Run(in io.Reader, out io.Writer) {
 	fmt.Fprint(out, intro)
 
 	scanner := bufio.NewScanner(in)
+
+	env := object.NewEnvironment()
 
 	// Read until EOF
 	for {
@@ -102,7 +105,7 @@ func Run(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		result := eval.Eval(program)
+		result := eval.Eval(program, env)
 
 		if result != nil {
 			fmt.Fprintln(out, "", color(prompt, magneta), "\t", color(result.String(), yellow))

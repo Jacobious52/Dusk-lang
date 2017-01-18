@@ -251,10 +251,10 @@ func TestErrorHandling(t *testing.T) {
 		`,
 			"cannot apply operator '+' for type 'bool' and 'bool'",
 		},
-		/*{
+		{
 			"foobar",
 			"identifier not found: foobar",
-		},*/
+		},
 	}
 
 	for _, tt := range tests {
@@ -274,7 +274,6 @@ func TestErrorHandling(t *testing.T) {
 	}
 }
 
-/*
 func TestLetStatements(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -290,7 +289,7 @@ func TestLetStatements(t *testing.T) {
 		testIntegerObject(t, testEval(tt.input), tt.expected)
 	}
 }
-*/
+
 /*
 func TestFunctionObject(t *testing.T) {
 	input := "fn(x) { x + 2; };"
@@ -358,9 +357,9 @@ func testEval(input string) object.Object {
 	l := lexer.WithString(input, "testeval")
 	p := parser.New(l)
 	program := p.ParseProgram()
-	//env := object.NewEnvironment()
+	env := object.NewEnvironment()
 
-	return Eval(program)
+	return Eval(program, env)
 }
 
 func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {

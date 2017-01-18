@@ -30,6 +30,7 @@ const (
 	assign                // =
 	sum                   // + -
 	product               // * /
+	exp                   // ^ %
 	prefix                // -X or !X
 	call                  // f(x)
 )
@@ -46,6 +47,8 @@ var precedences = map[token.Type]precedence{
 	token.LParen:   call,
 	token.Bang:     call,
 	token.Assign:   assign,
+	token.Exp:      exp,
+	token.Mod:      exp,
 }
 
 // Parser parses into a ast from the lexer
@@ -82,6 +85,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.Minus, p.parseInfixExpression)
 	p.registerInfix(token.Divide, p.parseInfixExpression)
 	p.registerInfix(token.Times, p.parseInfixExpression)
+	p.registerInfix(token.Exp, p.parseInfixExpression)
+	p.registerInfix(token.Mod, p.parseInfixExpression)
 	p.registerInfix(token.Equal, p.parseInfixExpression)
 	p.registerInfix(token.NotEqual, p.parseInfixExpression)
 	p.registerInfix(token.Assign, p.parseInfixExpression)

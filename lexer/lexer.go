@@ -104,6 +104,10 @@ func (l *Lexer) Next() (token.Token, error) {
 		tok = token.New(token.Times, l.char, l.pos)
 	case '/':
 		tok = token.New(token.Divide, l.char, l.pos)
+	case '^':
+		tok = token.New(token.Exp, l.char, l.pos)
+	case '%':
+		tok = token.New(token.Mod, l.char, l.pos)
 	case '!':
 		if l.peekChar() == '=' {
 			char := l.char
