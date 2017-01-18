@@ -90,7 +90,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return err
 		}
 
-		return doFunction(node.Token.Pos, function, args)
+		return doFunction(node.Token, function, args)
 
 		// literals
 	case *ast.IntegerLiteral:
@@ -395,10 +395,14 @@ func evalAssign(node *ast.InfixExpression, env *object.Environment) object.Objec
 	}
 }
 
-func doFunction(pos token.Position, f object.Object, args []object.Object) object.Object {
+func doFunction(t token.Token, f object.Object, args []object.Object) object.Object {
 	function, ok := f.(*object.Function)
 	if !ok {
-		return newError(pos, "'%s' is not a function", f.Type())
+		return newError(t.Pos, "type '%s' not a function", f.Type())
+	}
+
+	if len(function.Params) != len(args) {
+		return newError(t.Pos, "invalid number of arguments for function. Expected %d got %d", len(function.Params), len(args))
 	}
 
 	childEnv := adoptFunctionEnv(function, args)
