@@ -34,7 +34,7 @@ func color(v interface{}, color colorCode) string {
 }
 
 // Run starts the repl to read and run a line at a time
-func Run(in io.Reader, out io.Writer) {
+func Run(in io.Reader, out io.Writer) bool {
 
 	fmt.Fprint(out, intro)
 
@@ -48,11 +48,21 @@ func Run(in io.Reader, out io.Writer) {
 		fmt.Fprint(out, lineNum, color(prompt, green))
 
 		if ok := scanner.Scan(); !ok {
-			return
+			return false
 		}
 
 		// get current line
 		line := scanner.Text()
+
+		switch line {
+		case ":r":
+			return true
+		case ":x", ":q", ":e":
+			return false
+		case ":c":
+			fmt.Fprint(out, intro)
+			continue
+		}
 
 		var b bytes.Buffer
 		b.WriteString(line)
@@ -68,7 +78,7 @@ func Run(in io.Reader, out io.Writer) {
 				fmt.Fprint(out, lineNum, color(prompt, blue), strings.Repeat("\t", indent))
 
 				if ok := scanner.Scan(); !ok {
-					return
+					return false
 				}
 
 				nextLine := scanner.Text()

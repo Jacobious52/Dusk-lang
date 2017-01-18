@@ -6,5 +6,8 @@ import (
 )
 
 func main() {
-	repl.Run(os.Stdin, os.Stdout)
+	restart := true
+	for restart {
+		restart = repl.Run(os.Stdin, os.Stdout)
+	}
 }

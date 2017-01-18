@@ -100,7 +100,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.BooleanLiteral:
 		return boolToBoolean(node.Value)
 	case *ast.FunctionLiteral:
-		return &object.Function{Params: node.Params, Body: node.Body}
+		return &object.Function{Params: node.Params, Body: node.Body, Env: env}
 
 	case *ast.Identifier:
 		return evalIdentifier(node, env)

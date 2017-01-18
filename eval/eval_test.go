@@ -291,7 +291,7 @@ func TestLetStatements(t *testing.T) {
 }
 
 func TestFunctionObject(t *testing.T) {
-	input := "|x| : x + 2;"
+	input := "|x| x + 2;"
 
 	evaluated := testEval(input)
 	fn, ok := evaluated.(*object.Function)
@@ -308,40 +308,38 @@ func TestFunctionObject(t *testing.T) {
 		t.Fatalf("parameter is not 'x'. got=%q", fn.Params[0])
 	}
 
-	expectedBody := ": (x + 2) "
+	expectedBody := "| (x + 2) "
 
 	if fn.Body.String() != expectedBody {
 		t.Fatalf("body is not %q. got=%q", expectedBody, fn.Body.String())
 	}
 }
 
-/*
 func TestFunctionApplication(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected int64
 	}{
-		{"let identity = fn(x) { x; }; identity(5);", 5},
-		{"let identity = fn(x) { return x; }; identity(5);", 5},
-		{"let double = fn(x) { x * 2; }; double(5);", 10},
-		{"let add = fn(x, y) { x + y; }; add(5, 5);", 10},
-		{"let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20},
-		{"fn(x) { x; }(5)", 5},
+		{"let identity = |x| { x; }; identity(5);", 5},
+		{"let identity = |x| { ret x; }; identity(5);", 5},
+		{"let double = |x| { x * 2; }; double(5);", 10},
+		{"let add = |x, y| { x + y; }; add(5, 5);", 10},
+		{"let add = |x, y| { x + y; }; add(5 + 5, add(5, 5));", 20},
+		{"|x| { x; }(5)", 5},
 	}
 
 	for _, tt := range tests {
 		testIntegerObject(t, testEval(tt.input), tt.expected)
 	}
 }
-*/
-/*
+
 func TestEnclosingEnvironments(t *testing.T) {
 	input := `
 let first = 10;
 let second = 10;
 let third = 10;
 
-let ourFunction = fn(first) {
+let ourFunction = |first| {
   let second = 20;
 
   first + second + third;
@@ -351,7 +349,7 @@ ourFunction(20) + first + second;`
 
 	testIntegerObject(t, testEval(input), 70)
 }
-*/
+
 func testEval(input string) object.Object {
 	l := lexer.WithString(input, "testeval")
 	p := parser.New(l)
