@@ -497,7 +497,8 @@ func TestIfElseExpression(t *testing.T) {
 
 func TestFunctionLiteralParsing(t *testing.T) {
 	inputs := []string{`|x, y| { x + y; }`,
-		`|x, y| : x + y;`}
+		`|x, y|: x + y;`,
+		`|x, y| x + y;`}
 
 	for _, input := range inputs {
 

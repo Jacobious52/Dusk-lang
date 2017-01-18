@@ -332,7 +332,9 @@ func (p *Parser) parseIfExpression() ast.Expression {
 
 	if p.nextIs(token.Else) {
 		p.nextToken()
-		// current is else. do same check as before
+
+		// current is else.
+		// optional { : or none
 		if p.nextIs(token.LBrace) || p.nextIs(token.Continue) {
 			p.nextToken()
 		}
@@ -350,13 +352,13 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 	// current is | or !
 	f.Params = p.parseFunctionParams()
 
-	// current is |
-	if !(p.nextIs(token.LBrace) || p.nextIs(token.Continue)) {
-		p.newError(fmt.Sprintf("expected '{' or ':' following function literal definition, got '%s' instead", p.next))
-		return nil
+	// current is ending |
+	// optional { : or none
+	if p.nextIs(token.LBrace) || p.nextIs(token.Continue) {
+		p.nextToken()
 	}
-	p.nextToken()
 
+	// if current is not { function will be single statment
 	f.Body = p.parseBlockStatement()
 
 	return f
