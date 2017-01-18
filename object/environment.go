@@ -2,18 +2,29 @@ package object
 
 // Environment stores the variables for a context
 type Environment struct {
-	vars map[string]Object
+	vars   map[string]Object
+	parent *Environment
 }
 
 // NewEnvironment makes a new Environment with no values
 func NewEnvironment() *Environment {
 	s := make(map[string]Object)
-	return &Environment{s}
+	return &Environment{s, nil}
+}
+
+// NewChildEnvironment creates an enclosed Environment on the parent
+func NewChildEnvironment(parent *Environment) *Environment {
+	env := NewEnvironment()
+	env.parent = parent
+	return env
 }
 
 // Get a value from the variables map
 func (e *Environment) Get(name string) (Object, bool) {
 	o, ok := e.vars[name]
+	if !ok && e.parent != nil {
+		o, ok = e.parent.Get(name)
+	}
 	return o, ok
 }
 

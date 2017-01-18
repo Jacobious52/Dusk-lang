@@ -179,25 +179,25 @@ if (10 > 1) {
 `,
 			10,
 		},
-		/*{
-					`
-		let f = fn(x) {
+		{
+			`
+		let f = |x| {
 		  ret x;
 		  x + 10;
 		};
 		f(10);`,
-					10,
-				},
-				{
-					`
-		let f = fn(x) {
-		   let ret = x + 10;
+			10,
+		},
+		{
+			`
+		let f = |x| {
+		   let result = x + 10;
 		   ret result;
 		   ret 10;
 		};
 		f(10);`,
-					20,
-				},*/
+			20,
+		},
 	}
 
 	for _, tt := range tests {
@@ -290,9 +290,8 @@ func TestLetStatements(t *testing.T) {
 	}
 }
 
-/*
 func TestFunctionObject(t *testing.T) {
-	input := "fn(x) { x + 2; };"
+	input := "|x| : x + 2;"
 
 	evaluated := testEval(input)
 	fn, ok := evaluated.(*object.Function)
@@ -300,22 +299,22 @@ func TestFunctionObject(t *testing.T) {
 		t.Fatalf("object is not Function. got=%T (%+v)", evaluated, evaluated)
 	}
 
-	if len(fn.Parameters) != 1 {
-		t.Fatalf("function has wrong parameters. Parameters=%+v",
-			fn.Parameters)
+	if len(fn.Params) != 1 {
+		t.Fatalf("function has wrong parameters. Params=%+v",
+			fn.Params)
 	}
 
-	if fn.Parameters[0].String() != "x" {
-		t.Fatalf("parameter is not 'x'. got=%q", fn.Parameters[0])
+	if fn.Params[0].String() != "x" {
+		t.Fatalf("parameter is not 'x'. got=%q", fn.Params[0])
 	}
 
-	expectedBody := "(x + 2)"
+	expectedBody := ": (x + 2) "
 
 	if fn.Body.String() != expectedBody {
 		t.Fatalf("body is not %q. got=%q", expectedBody, fn.Body.String())
 	}
 }
-*/
+
 /*
 func TestFunctionApplication(t *testing.T) {
 	tests := []struct {

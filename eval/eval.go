@@ -79,6 +79,18 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalInfixExpr(node.Token, left, right)
 	case *ast.IfExpression:
 		return evalIfExpr(node, env)
+	case *ast.CallExpression:
+		function := Eval(node.Func, env)
+		if isError(function) {
+			return function
+		}
+
+		args, err := evalExpressions(node.Args, env)
+		if err != nil {
+			return err
+		}
+
+		return doFunction(node.Token.Pos, function, args)
 
 		// literals
 	case *ast.IntegerLiteral:
@@ -87,6 +99,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return &object.Float{Value: node.Value}
 	case *ast.BooleanLiteral:
 		return boolToBoolean(node.Value)
+	case *ast.FunctionLiteral:
+		return &object.Function{Params: node.Params, Body: node.Body}
 
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
@@ -129,6 +143,20 @@ func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) obje
 	}
 
 	return result
+}
+
+func evalExpressions(expressions []ast.Expression, env *object.Environment) ([]object.Object, object.Object) {
+	var evaluated []object.Object
+
+	for _, e := range expressions {
+		evaled := Eval(e, env)
+		if isError(evaled) {
+			return []object.Object{}, evaled
+		}
+		evaluated = append(evaluated, evaled)
+	}
+
+	return evaluated, nil
 }
 
 func evalIfExpr(node *ast.IfExpression, env *object.Environment) object.Object {
@@ -365,4 +393,30 @@ func evalAssign(node *ast.InfixExpression, env *object.Environment) object.Objec
 	default:
 		return nil
 	}
+}
+
+func doFunction(pos token.Position, f object.Object, args []object.Object) object.Object {
+	function, ok := f.(*object.Function)
+	if !ok {
+		return newError(pos, "'%s' is not a function", f.Type())
+	}
+
+	childEnv := adoptFunctionEnv(function, args)
+	evaluated := Eval(function.Body, childEnv)
+
+	if val, ok := evaluated.(*object.ReturnValue); ok {
+		return val.Value
+	}
+
+	return evaluated
+}
+
+func adoptFunctionEnv(f *object.Function, args []object.Object) *object.Environment {
+	env := object.NewChildEnvironment(f.Env)
+
+	for i, p := range f.Params {
+		env.Set(p.Value, args[i])
+	}
+
+	return env
 }

@@ -1,8 +1,11 @@
 package object
 
 import (
+	"bytes"
 	"fmt"
+	"jacob/black/ast"
 	"jacob/black/token"
+	"strings"
 )
 
 // Type is a flag for the type of object
@@ -23,6 +26,8 @@ const (
 	ReturnType
 	// ErrorType runtime error
 	ErrorType
+	// FunctionType is a closure
+	FunctionType
 )
 
 // String for type
@@ -40,6 +45,8 @@ func (t Type) String() string {
 		return "return_value"
 	case ErrorType:
 		return "error"
+	case FunctionType:
+		return "function"
 	default:
 		return "unknown"
 	}
@@ -186,5 +193,40 @@ func (e *Error) Type() Type {
 
 // CanApply for this type
 func (e *Error) CanApply(op token.Type, t Type) bool {
+	return false
+}
+
+// Function contains a function and current environment
+type Function struct {
+	Params []*ast.Identifier
+	Body   *ast.BlockStatement
+	Env    *Environment
+}
+
+// String for Function
+func (f *Function) String() string {
+	var b bytes.Buffer
+
+	params := []string{}
+	for _, p := range f.Params {
+		params = append(params, p.String())
+	}
+
+	b.WriteByte('|')
+	b.WriteString(strings.Join(params, ", "))
+	b.WriteString("| {\n")
+	b.WriteString(f.Body.String())
+	b.WriteString("\n}")
+
+	return b.String()
+}
+
+// Type for Function
+func (f *Function) Type() Type {
+	return FunctionType
+}
+
+// CanApply for this type
+func (f *Function) CanApply(op token.Type, t Type) bool {
 	return false
 }
