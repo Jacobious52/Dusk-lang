@@ -6,7 +6,8 @@
 
 // stack pointer and stack
 let sp = 0
-let stack = array(1024, 0)
+let stack = 1024::0 // create an array of 1024 zeros
+// note: range contructor 0..10 creates array from 0 to 9
 
 // instruction pointer
 let ip = 0
@@ -21,7 +22,7 @@ let leftBranch = ! {
         branches = push(branches, ip)
         while src[ip] != ']' {
             if ip > len(src)-1: break
-            ip++
+            ip+=1
         }
     }
 }
@@ -42,13 +43,15 @@ let opFunctions = {
 }
 
 let main = |args| {
-
     src = reads!
 
-    while ip < len(src) {
+    for instruction in src {
         if src[ip] in opFunctions {
-            opFunctions(src[ip])!
+            opFunctions(instruction)!
             sp += 1
+        } else {
+            show("unknown instruction")
+            break
         }
     }
 
