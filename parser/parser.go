@@ -333,7 +333,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	if p.nextIs(token.Else) {
 		p.nextToken()
 		// current is else. do same check as before
-		if p.nextIs(token.LBrace) {
+		if p.nextIs(token.LBrace) || p.nextIs(token.Continue) {
 			p.nextToken()
 		}
 
