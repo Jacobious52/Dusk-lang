@@ -256,7 +256,7 @@ func (p *Parser) parseExpression(prec precedence) ast.Expression {
 
 func (p *Parser) parseBangExpression() ast.Expression {
 	// special case for ! for functions with no arguments
-	if p.nextIs(token.LBrace) || p.nextIs(token.Arrow) {
+	if p.nextIs(token.LBrace) || p.nextIs(token.Continue) {
 		return p.parseFunctionLiteral()
 	}
 	// parse a regular prefix Expression
@@ -321,8 +321,8 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	expr.Cond = p.parseExpression(lowest)
 
 	// check if with mult statement or single statement
-	if !(p.nextIs(token.LBrace) || p.nextIs(token.Arrow)) {
-		p.newError(fmt.Sprintf("expected '{' or '->' following if statement, got '%s' instead", p.next))
+	if !(p.nextIs(token.LBrace) || p.nextIs(token.Continue)) {
+		p.newError(fmt.Sprintf("expected '{' or ':' following if statement, got '%s' instead", p.next))
 		return nil
 	}
 
@@ -333,8 +333,8 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	if p.nextIs(token.Else) {
 		p.nextToken()
 		// current is else. do same check as before
-		if !(p.nextIs(token.LBrace) || p.nextIs(token.Arrow)) {
-			p.newError(fmt.Sprintf("expected '{' or '->' following else statement, got '%s' instead", p.next))
+		if !(p.nextIs(token.LBrace) || p.nextIs(token.Continue)) {
+			p.newError(fmt.Sprintf("expected '{' or ':' following else statement, got '%s' instead", p.next))
 			return nil
 		}
 
@@ -353,7 +353,7 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 	f.Params = p.parseFunctionParams()
 
 	// current is |
-	if !(p.nextIs(token.LBrace) || p.nextIs(token.Arrow)) {
+	if !(p.nextIs(token.LBrace) || p.nextIs(token.Continue)) {
 		p.newError(fmt.Sprintf("expected '{' or '->' following function literal definition, got '%s' instead", p.next))
 		return nil
 	}

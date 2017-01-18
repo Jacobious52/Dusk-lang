@@ -35,12 +35,12 @@ let rightBranch = ! {
 }
 
 let opFunctions = {
-    '>' : ! -> sp += 1
-    '<' : ! -> sp -= 1
-    '+' : ! -> stack[sp] += 1
-    '-' : ! -> stack[sp] -= 1
-    '.' : ! -> show(stack[sp])
-    ',' : ! -> sp = readc!
+    '>' : ! : sp += 1
+    '<' : ! : sp -= 1
+    '+' : ! : stack[sp] += 1
+    '-' : ! : stack[sp] -= 1
+    '.' : ! : show(stack[sp])
+    ',' : ! : sp = readc!
     '[' : leftBranch
     ']' : rightBranch
 }

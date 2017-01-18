@@ -99,16 +99,7 @@ func (l *Lexer) Next() (token.Token, error) {
 			tok = token.New(token.Plus, l.char, l.pos)
 		}
 	case '-':
-		if l.peekChar() == '>' {
-			char := l.char
-			l.nextChar()
-
-			b := make([]byte, 2)
-			b[0] = char
-			b[1] = l.char
-
-			tok = token.Token{Type: token.Arrow, Literal: string(b), Pos: l.pos}
-		} else if l.peekChar() == '=' {
+		if l.peekChar() == '=' {
 			char := l.char
 			l.nextChar()
 
@@ -141,6 +132,8 @@ func (l *Lexer) Next() (token.Token, error) {
 		} else {
 			tok = token.New(token.Bang, l.char, l.pos)
 		}
+	case ':':
+		tok = token.New(token.Continue, l.char, l.pos)
 	case '<':
 		tok = token.New(token.Less, l.char, l.pos)
 	case '>':

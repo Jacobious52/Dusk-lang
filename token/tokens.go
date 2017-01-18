@@ -38,9 +38,9 @@ const (
 	LBracket // LBracket [
 	RBracket // RBracket ]
 
-	Comma // Comma ,
-	Bar   // Bar |  - donotes function arg bar
-	Arrow // Arrow - starts a single statment/line block
+	Comma    // Comma ,
+	Bar      // Bar |  - donotes function arg bar
+	Continue // Continue - starts a single statment/line block
 
 	Let    // Let keyword
 	If     // If keyword
@@ -97,8 +97,8 @@ func (t Type) String() string {
 		return "]"
 	case Bar:
 		return "|"
-	case Arrow:
-		return "->"
+	case Continue:
+		return ":"
 	case Comma:
 		return ","
 	case Terminator:
