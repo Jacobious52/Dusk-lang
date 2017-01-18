@@ -81,12 +81,23 @@ func (l *Lexer) Next() (token.Token, error) {
 			b[0] = char
 			b[1] = l.char
 
-			tok = token.Token{Type: token.Equal, Literal: string(b)}
+			tok = token.Token{Type: token.Equal, Literal: string(b), Pos: l.pos}
 		} else {
 			tok = token.New(token.Assign, l.char, l.pos)
 		}
 	case '+':
-		tok = token.New(token.Plus, l.char, l.pos)
+		if l.peekChar() == '=' {
+			char := l.char
+			l.nextChar()
+
+			b := make([]byte, 2)
+			b[0] = char
+			b[1] = l.char
+
+			tok = token.Token{Type: token.Inc, Literal: string(b), Pos: l.pos}
+		} else {
+			tok = token.New(token.Plus, l.char, l.pos)
+		}
 	case '-':
 		if l.peekChar() == '>' {
 			char := l.char
@@ -96,7 +107,16 @@ func (l *Lexer) Next() (token.Token, error) {
 			b[0] = char
 			b[1] = l.char
 
-			tok = token.Token{Type: token.Arrow, Literal: string(b)}
+			tok = token.Token{Type: token.Arrow, Literal: string(b), Pos: l.pos}
+		} else if l.peekChar() == '=' {
+			char := l.char
+			l.nextChar()
+
+			b := make([]byte, 2)
+			b[0] = char
+			b[1] = l.char
+
+			tok = token.Token{Type: token.Dec, Literal: string(b), Pos: l.pos}
 		} else {
 			tok = token.New(token.Minus, l.char, l.pos)
 		}
@@ -117,7 +137,7 @@ func (l *Lexer) Next() (token.Token, error) {
 			b[0] = char
 			b[1] = l.char
 
-			tok = token.Token{Type: token.NotEqual, Literal: string(b)}
+			tok = token.Token{Type: token.NotEqual, Literal: string(b), Pos: l.pos}
 		} else {
 			tok = token.New(token.Bang, l.char, l.pos)
 		}

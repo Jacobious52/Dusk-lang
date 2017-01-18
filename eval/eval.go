@@ -65,7 +65,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			if v := evalAssign(node, env); v != nil {
 				return v
 			}
-			return newError(node.Token.Pos, "cannot bind a literal value to a value")
+			return newError(node.Token.Pos, "cannot bind a literal to a value")
 		}
 
 		left := Eval(node.Left, env)

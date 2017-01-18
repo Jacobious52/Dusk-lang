@@ -21,6 +21,8 @@ const (
 	Bang    // Bang !
 	Less    // Less <
 	Greater // Greater >
+	Inc     // Inc +=
+	Dec     // Dec -=
 
 	Equal    // Equal ==
 	NotEqual // NotEqual !=
@@ -71,6 +73,10 @@ func (t Type) String() string {
 		return "^"
 	case Mod:
 		return "%"
+	case Inc:
+		return "+="
+	case Dec:
+		return "-="
 	case Bang:
 		return "!"
 	case Less:

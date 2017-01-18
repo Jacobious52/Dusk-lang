@@ -49,6 +49,8 @@ var precedences = map[token.Type]precedence{
 	token.Assign:   assign,
 	token.Exp:      exp,
 	token.Mod:      exp,
+	token.Inc:      assign,
+	token.Dec:      assign,
 }
 
 // Parser parses into a ast from the lexer
@@ -88,6 +90,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.Exp, p.parseInfixExpression)
 	p.registerInfix(token.Mod, p.parseInfixExpression)
 	p.registerInfix(token.Equal, p.parseInfixExpression)
+	p.registerInfix(token.Inc, p.parseInfixExpression)
+	p.registerInfix(token.Dec, p.parseInfixExpression)
 	p.registerInfix(token.NotEqual, p.parseInfixExpression)
 	p.registerInfix(token.Assign, p.parseInfixExpression)
 	p.registerInfix(token.Less, p.parseInfixExpression)
@@ -269,6 +273,29 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 }
 
 func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
+	// += and -= operators patch ast in real time
+	// expand a += 3 to a = a + 3
+	if p.current.Type == token.Inc || p.current.Type == token.Dec {
+
+		// top level is a = (...)
+		expr := &ast.InfixExpression{Token: token.Token{Type: token.Assign, Literal: token.Assign.String(), Pos: p.current.Pos}, Left: left, Operator: token.Assign}
+
+		expanded := token.Plus
+		if p.current.Type == token.Dec {
+			expanded = token.Minus
+		}
+
+		// next level is ... = a + expr..
+		exprPlus := &ast.InfixExpression{Token: token.Token{Type: expanded, Literal: expanded.String(), Pos: p.current.Pos}, Left: left, Operator: expanded}
+		expr.Right = exprPlus
+
+		prec := p.currentPrecedence()
+		p.nextToken()
+		exprPlus.Right = p.parseExpression(prec)
+
+		return expr
+	}
+
 	expr := &ast.InfixExpression{Token: p.current, Left: left, Operator: p.current.Type}
 
 	prec := p.currentPrecedence()
