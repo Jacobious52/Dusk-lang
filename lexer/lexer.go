@@ -114,7 +114,11 @@ func (l *Lexer) Next() (token.Token, error) {
 	case '*':
 		tok = token.New(token.Times, l.char, l.pos)
 	case '/':
-		tok = token.New(token.Divide, l.char, l.pos)
+		if l.peekChar() == '/' {
+			l.consumeComment()
+		} else {
+			tok = token.New(token.Divide, l.char, l.pos)
+		}
 	case '^':
 		tok = token.New(token.Exp, l.char, l.pos)
 	case '%':
@@ -203,11 +207,20 @@ func (l *Lexer) consumeWhitespace() {
 	}
 }
 
+func (l *Lexer) consumeComment() {
+	for l.char != '\n' {
+		l.nextChar()
+	}
+}
+
 func (l *Lexer) readIdentifier() token.Token {
 	pos := l.pos
-
 	p := l.curr
-	for isLetter(l.char) {
+
+	// first must be _ or a-z
+	l.nextChar()
+
+	for isLetter(l.char) || isDigit(l.char) {
 		l.nextChar()
 	}
 	id := string(l.buff[p:l.curr])
