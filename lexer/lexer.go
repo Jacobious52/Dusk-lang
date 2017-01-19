@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"jacob/black/token"
+	"strings"
 )
 
 // Lexer performs the tokenisation on a io.Reader
@@ -171,6 +172,8 @@ func (l *Lexer) Next() (token.Token, error) {
 		if len(l.stack) > 0 {
 			err = errors.New(fmt.Sprint("Unclosed ", l.stack[len(l.stack)-1]))
 		}
+	case '"':
+		tok = l.readString()
 	default:
 		if isLetter(l.char) {
 			return l.readIdentifier(), nil
@@ -252,7 +255,21 @@ func (l *Lexer) readNumber() token.Token {
 	return token.Token{Type: l.last, Literal: string(l.buff[p:l.curr]), Pos: pos}
 }
 
-func (l *Lexer) nextChar() {
+func (l *Lexer) readString() token.Token {
+	pos := l.pos
+
+	p := l.curr + 1
+	for l.nextChar() != '"' {
+	}
+
+	str := string(l.buff[p:l.curr])
+	r := strings.NewReplacer("\\t", "\t", "\\n", "\n")
+	str = r.Replace(str)
+
+	return token.Token{Type: token.String, Literal: str, Pos: pos}
+}
+
+func (l *Lexer) nextChar() byte {
 	if l.next >= len(l.buff) {
 		l.char = 0
 	} else {
@@ -270,6 +287,7 @@ func (l *Lexer) nextChar() {
 		l.pos.Col = 0
 	}
 
+	return l.char
 }
 
 func (l *Lexer) peekChar() byte {

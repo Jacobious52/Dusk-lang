@@ -137,7 +137,37 @@ func (b *Boolean) CanApply(op token.Type, t Type) bool {
 	}
 }
 
-// Nil -  No value
+// String is a string
+type String struct {
+	Value string
+}
+
+// String for String
+func (s *String) String() string {
+	return s.Value
+}
+
+// Type for String
+func (s *String) Type() Type {
+	return StringType
+}
+
+// CanApply for this type
+func (s *String) CanApply(op token.Type, t Type) bool {
+	switch op {
+	case token.Equal, token.NotEqual:
+		return true
+	case token.Plus:
+		if t == StringType {
+			return true
+		}
+		return false
+	default:
+		return false
+	}
+}
+
+// Nil - No value
 type Nil struct{}
 
 // String for Boolean

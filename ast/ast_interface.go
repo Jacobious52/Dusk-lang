@@ -87,6 +87,11 @@ func (c *CallExpression) TokenLiteral() string {
 	return c.Token.Literal
 }
 
+// TokenLiteral for StringLiteral
+func (s *StringLiteral) TokenLiteral() string {
+	return s.Token.Literal
+}
+
 // **---String-implementations---** //
 
 // String for Program
@@ -256,8 +261,14 @@ func (f *FloatLiteral) String() string {
 	return f.Token.Literal
 }
 
+// String for BooleanLiteral
 func (b *BooleanLiteral) String() string {
 	return b.Token.Literal
+}
+
+// String for StringLiteral
+func (s *StringLiteral) String() string {
+	return s.Token.String()
 }
 
 // Statement is the basis for a statment in the ast
@@ -290,3 +301,4 @@ func (b *BooleanLiteral) expressionNode()   {}
 func (f *IfExpression) expressionNode()     {}
 func (f *FunctionLiteral) expressionNode()  {}
 func (c *CallExpression) expressionNode()   {}
+func (s *StringLiteral) expressionNode()    {}

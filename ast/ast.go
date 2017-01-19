@@ -26,7 +26,7 @@ type ReturnStatement struct {
 	Value Expression
 }
 
-// IfExpression ::= 'if' expression ('{' | '->') BlockStatement '}'?
+// IfExpression ::= 'if' expression ('{' | ':') BlockStatement '}'? 'else' ('{' | ':')? BlockStatement '}'?
 type IfExpression struct {
 	Token token.Token // token.If
 	Cond  Expression
@@ -34,7 +34,7 @@ type IfExpression struct {
 	Else  *BlockStatement
 }
 
-// FunctionLiteral ::= '|' (Identifier | (Identifier ',')?)* ('{' | '->') BlockStatement '}'?
+// FunctionLiteral ::= '|' (Identifier | (Identifier ',')?)* ('{' | ':')? BlockStatement '}'?
 type FunctionLiteral struct {
 	Token  token.Token // The first '|' bar token
 	Params []*Identifier
@@ -98,4 +98,11 @@ type BooleanLiteral struct {
 	// token.True | token.False
 	Token token.Token
 	Value bool
+}
+
+// StringLiteral ::= "(a...z)"
+type StringLiteral struct {
+	// token.String
+	Token token.Token
+	Value string
 }

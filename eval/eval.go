@@ -101,6 +101,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return boolToBoolean(node.Value)
 	case *ast.FunctionLiteral:
 		return &object.Function{Params: node.Params, Body: node.Body, Env: env}
+	case *ast.StringLiteral:
+		return &object.String{Value: node.Value}
 
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
@@ -217,6 +219,7 @@ func evalPrefixExpr(op token.Token, right object.Object) object.Object {
 
 func evalInfixExpr(op token.Token, left object.Object, right object.Object) object.Object {
 
+	// catch early type errors
 	if !left.CanApply(op.Type, right.Type()) {
 		return newError(op.Pos, "cannot apply operator '%s' for type '%s' and '%s'", op, left.Type(), right.Type())
 	}
@@ -249,6 +252,11 @@ func evalInfixExpr(op token.Token, left object.Object, right object.Object) obje
 		}
 	}
 
+	// two strings
+	if left.Type() == object.StringType && right.Type() == object.StringType {
+		return evalStringInfixExpr(op, left, right)
+	}
+
 	// compare actual runtime object
 	if op.Type == token.Equal {
 		return boolToBoolean(left == right)
@@ -258,6 +266,22 @@ func evalInfixExpr(op token.Token, left object.Object, right object.Object) obje
 
 	// otherwise 2 objects that don't match
 	return newError(op.Pos, "unknown operator '%s' for type '%s' and '%s'", op, left.Type(), right.Type())
+}
+
+func evalStringInfixExpr(op token.Token, left object.Object, right object.Object) object.Object {
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+
+	switch op.Type {
+	case token.Plus:
+		return &object.String{Value: leftVal + rightVal}
+	case token.Equal:
+		return boolToBoolean(leftVal == rightVal)
+	case token.NotEqual:
+		return boolToBoolean(leftVal == rightVal)
+	default:
+		return newError(op.Pos, "unknown operator '%s' for type '%s' and '%s'", op.Type, left.Type(), right.Type())
+	}
 }
 
 func evalIntegerInfixExpr(op token.Token, left object.Object, right object.Object) object.Object {

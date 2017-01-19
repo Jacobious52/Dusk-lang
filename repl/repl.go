@@ -117,8 +117,8 @@ func Run(in io.Reader, out io.Writer) bool {
 
 		result := eval.Eval(program, env)
 
-		if result != nil {
-			fmt.Fprintln(out, "", color(prompt, magneta), "\t", color(result.String(), yellow))
+		if result != nil && result.Type() != object.NilType {
+			fmt.Fprintln(out, "", color(prompt, magneta), "\t", color(strings.Replace(result.String(), "\n", fmt.Sprint("\n ", color(prompt, magneta), " \t "), -1), yellow))
 			fmt.Fprint(out, "\n")
 		}
 	}
