@@ -400,7 +400,7 @@ func TestBooleanExpression(t *testing.T) {
 func TestIfExpression(t *testing.T) {
 	inputs := []string{
 		`if x < y { x }`,
-		`if x < y : x`,
+		`if x < y: x`,
 	}
 
 	for _, input := range inputs {
@@ -575,8 +575,7 @@ func TestFunctionParameterParsing(t *testing.T) {
 		{input: "|x| {};", expectedParams: []string{"x"}},
 		{input: "|x, y, z| {};", expectedParams: []string{"x", "y", "z"}},
 		{input: "|x, y, z| :;", expectedParams: []string{"x", "y", "z"}},
-		{input: "! {};", expectedParams: []string{}},
-		{input: "! :;", expectedParams: []string{}},
+		{input: "|| :;", expectedParams: []string{}},
 	}
 
 	for _, tt := range tests {

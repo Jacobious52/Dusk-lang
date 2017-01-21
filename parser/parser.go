@@ -74,7 +74,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.Identifier, p.parseIdentifier)
 	p.registerPrefix(token.Int, p.parseIntegerLiteral)
 	p.registerPrefix(token.Float, p.parseFloatLiteral)
-	p.registerPrefix(token.Bang, p.parseBangExpression)
+	p.registerPrefix(token.Bang, p.parsePrefixExpression)
 	p.registerPrefix(token.Minus, p.parsePrefixExpression)
 	p.registerPrefix(token.True, p.parseBooleanExpression)
 	p.registerPrefix(token.False, p.parseBooleanExpression)
@@ -255,15 +255,6 @@ func (p *Parser) parseExpression(prec precedence) ast.Expression {
 	return leftExpr
 }
 
-func (p *Parser) parseBangExpression() ast.Expression {
-	// special case for ! for functions with no arguments
-	if p.nextIs(token.LBrace) || p.nextIs(token.Continue) {
-		return p.parseFunctionLiteral()
-	}
-	// parse a regular prefix Expression
-	return p.parsePrefixExpression()
-}
-
 func (p *Parser) parsePrefixExpression() ast.Expression {
 	expr := &ast.PrefixExpression{Token: p.current, Operator: p.current.Type}
 
@@ -354,7 +345,7 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 	f.Params = p.parseFunctionParams()
 
 	// current is ending |
-	// optional { : or none
+	// optional {
 	if p.nextIs(token.LBrace) || p.nextIs(token.Continue) {
 		p.nextToken()
 	}
