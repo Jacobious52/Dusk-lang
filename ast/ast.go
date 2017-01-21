@@ -81,6 +81,12 @@ type Identifier struct {
 	Value string
 }
 
+// AccessIdentifier ::= name '.' name ('.' name)*
+type AccessIdentifier struct {
+	Token  token.Token // the root (first) token.Identifier
+	Values []string
+}
+
 // IntegerLiteral ::= int of 64 bits
 type IntegerLiteral struct {
 	Token token.Token // token.Int

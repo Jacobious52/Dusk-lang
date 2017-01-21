@@ -403,6 +403,13 @@ func TestClassAccess(t *testing.T) {
 		}
 		let h = house!
 		h.tennant.age`, 5},
+		{`let person = || {
+			let age = 5
+			ret || person
+		};
+		let p = person!
+		p.age = 6
+		p.age`, 6},
 	}
 
 	for _, tt := range tests {

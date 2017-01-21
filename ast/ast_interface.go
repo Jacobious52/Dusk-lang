@@ -12,6 +12,8 @@ type Node interface {
 	String() string
 }
 
+// **---TokenLiteral-implementations---** //
+
 // TokenLiteral impl for Program
 func (p *Program) TokenLiteral() string {
 	if len(p.Statements) > 0 {
@@ -20,8 +22,6 @@ func (p *Program) TokenLiteral() string {
 	return ""
 }
 
-// **---TokenLiteral-implementations---** //
-
 // TokenLiteral impl for LetStatement
 func (l *LetStatement) TokenLiteral() string {
 	return l.Token.Literal
@@ -29,6 +29,11 @@ func (l *LetStatement) TokenLiteral() string {
 
 // TokenLiteral impl for Identifier
 func (i *Identifier) TokenLiteral() string {
+	return i.Token.Literal
+}
+
+// TokenLiteral impl for AccessIdentifier
+func (i *AccessIdentifier) TokenLiteral() string {
 	return i.Token.Literal
 }
 
@@ -221,6 +226,7 @@ func (bs *BlockStatement) String() string {
 	return b.String()
 }
 
+// String for CallExpression
 func (c *CallExpression) String() string {
 	var b bytes.Buffer
 
@@ -240,6 +246,15 @@ func (c *CallExpression) String() string {
 // String for Identifier
 func (i *Identifier) String() string {
 	return i.Value
+}
+
+// String for AccessIdentifier
+func (i *AccessIdentifier) String() string {
+	names := []string{}
+	for _, n := range i.Values {
+		names = append(names, n)
+	}
+	return strings.Join(names, ".")
 }
 
 // String for ExpressionStatement
@@ -293,6 +308,7 @@ type Expression interface {
 // **---expressionNode-implementations---** //
 
 func (i *Identifier) expressionNode()       {}
+func (i *AccessIdentifier) expressionNode() {}
 func (i *IntegerLiteral) expressionNode()   {}
 func (f *FloatLiteral) expressionNode()     {}
 func (p *PrefixExpression) expressionNode() {}

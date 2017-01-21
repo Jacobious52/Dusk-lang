@@ -28,6 +28,27 @@ func isError(o object.Object) bool {
 	return false
 }
 
+func bottomEnv(id *ast.AccessIdentifier, env *object.Environment) (*object.Environment, string, object.Object) {
+	currentEnv := env
+
+	for i, v := range id.Values {
+		if i < len(id.Values)-1 {
+			if val, ok := currentEnv.Get(v); ok {
+				if val.Type() != object.FunctionType {
+					return nil, v, newError(id.Token.Pos, "cannot use '.' on type '%s'. Must be function", val.Type())
+				}
+
+				val := val.(*object.Function)
+				currentEnv = val.Env
+			} else {
+				return nil, v, newError(id.Token.Pos, "identifier not found in context: %s", v)
+			}
+		}
+	}
+
+	return currentEnv, id.Values[len(id.Values)-1], nil
+}
+
 // Eval evaluates the program node and returns an object as a result
 func Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
@@ -63,9 +84,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 		if node.Operator == token.Assign {
 			return evalAssign(node, env)
-		} else if node.Operator == token.Dot {
+		} /*else if node.Operator == token.Dot {
 			return evalClass(node, env)
-		}
+		}*/
 
 		left := Eval(node.Left, env)
 		if isError(left) {
@@ -105,6 +126,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
+	case *ast.AccessIdentifier:
+		return evalAccessIdentifier(node, env)
 	}
 	return nil
 }
@@ -388,55 +411,62 @@ func evalIdentifier(id *ast.Identifier, env *object.Environment) object.Object {
 	return newError(id.Token.Pos, "identifier not found: %s", id.Value)
 }
 
+func evalAccessIdentifier(id *ast.AccessIdentifier, env *object.Environment) object.Object {
+
+	bottom, last, err := bottomEnv(id, env)
+	if err != nil {
+		return err
+	}
+
+	if val, ok := bottom.Get(last); ok {
+		return val
+	}
+	return newError(id.Token.Pos, "identifier not found in context: %s", last)
+}
+
+// special case = assign operator
 func evalAssign(node *ast.InfixExpression, env *object.Environment) object.Object {
-	// special case = assign operator
+
+	var bottom *object.Environment
+	var id string
+
 	switch l := node.Left.(type) {
 	case *ast.Identifier:
-		// check if exists already
-		if val, ok := env.Get(l.Value); ok {
-			if isError(val) {
-				return val
-			}
-
-			// eval rhs
-			right := Eval(node.Right, env)
-			if isError(right) {
-				return right
-			}
-
-			// must be same type
-			if val.Type() == right.Type() {
-				env.Set(l.Value, right)
-				return right
-			}
-
-			return newError(l.Token.Pos, "cannot assign variable '%s' of type '%s' to value '%s' of type '%s'", l.Value, val.Type(), right, right.Type())
+		id = l.Value
+		bottom = env
+	case *ast.AccessIdentifier:
+		b, last, err := bottomEnv(l, env)
+		if err != nil {
+			return err
 		}
-		return newError(l.Token.Pos, "cannot assign value to variable '%s' that does not exist", l.Value)
+
+		id = last
+		bottom = b
 	default:
 		return newError(node.Token.Pos, "cannot bind a literal to a value")
 	}
-}
 
-func evalClass(node *ast.InfixExpression, env *object.Environment) object.Object {
-
-	left := Eval(node.Left, env)
-	if isError(left) {
-		return left
-	}
-
-	if left.Type() == object.FunctionType {
-		if right, ok := node.Right.(*ast.Identifier); ok {
-			left := left.(*object.Function)
-			if val, ok := left.Env.Get(right.Value); ok {
-				return val
-			}
-			return newError(node.Token.Pos, "identifer '%s' does not exist in context of function", right.Value)
+	// check if exists already
+	if val, ok := bottom.Get(id); ok {
+		if isError(val) {
+			return val
 		}
-		return newError(node.Token.Pos, "rhs of '.' operator must be an identifier. Got '%s'", node.Right)
-	}
 
-	return newError(node.Token.Pos, "cannot use '.' operator on type '%s'. Must be function", left.Type())
+		// eval rhs
+		right := Eval(node.Right, env)
+		if isError(right) {
+			return right
+		}
+
+		// must be same type
+		if val.Type() == right.Type() {
+			bottom.Set(id, right)
+			return right
+		}
+
+		return newError(node.Token.Pos, "cannot assign variable '%s' of type '%s' to value '%s' of type '%s'", id, val.Type(), right, right.Type())
+	}
+	return newError(node.Token.Pos, "cannot assign value to variable '%s' that does not exist", id)
 }
 
 func doFunction(t token.Token, f object.Object, args []object.Object) object.Object {

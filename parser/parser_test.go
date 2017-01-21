@@ -9,6 +9,29 @@ import (
 	"testing"
 )
 
+func TestAccessIdentifier(t *testing.T) {
+	input := `first.second.last`
+	expect := []string{"first", "second", "last"}
+
+	l := lexer.WithString(input, "test")
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	literal, ok := stmt.Expression.(*ast.AccessIdentifier)
+
+	if !ok {
+		t.Fatalf("exp not *ast.AccessIdentifier. got=%T", stmt.Expression)
+	}
+
+	for i, v := range literal.Values {
+		if v != expect[i] {
+			t.Errorf("literal.Value not %q. got=%q", expect[i], v)
+		}
+	}
+}
+
 func TestStringLiteralExpression(t *testing.T) {
 	input := `"hello world";`
 
