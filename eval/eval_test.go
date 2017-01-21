@@ -382,6 +382,34 @@ ourFunction(20) + first + second;`
 	testIntegerObject(t, testEval(input), 70)
 }
 
+func TestClassAccess(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{`let person = || {
+			let age = 5
+			ret || person
+		};
+		let p = person!
+		p.age`, 5},
+		{`let person = || {
+			let age = 5
+			ret || person
+		};
+		let house = || {
+			let tennant = person!
+			ret || house
+		}
+		let h = house!
+		h.tennant.age`, 5},
+	}
+
+	for _, tt := range tests {
+		testIntegerObject(t, testEval(tt.input), tt.expected)
+	}
+}
+
 func testEval(input string) object.Object {
 	l := lexer.WithString(input, "testeval")
 	p := parser.New(l)

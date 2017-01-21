@@ -38,6 +38,7 @@ const (
 	LBracket // LBracket [
 	RBracket // RBracket ]
 
+	Dot      // Dot .
 	Comma    // Comma ,
 	Bar      // Bar |  - donotes function arg bar
 	Continue // Continue - starts a single statment/line block
@@ -101,6 +102,8 @@ func (t Type) String() string {
 		return ":"
 	case Comma:
 		return ","
+	case Dot:
+		return "."
 	case Terminator:
 		return "terminator"
 	case EOF:

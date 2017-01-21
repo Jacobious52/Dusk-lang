@@ -62,10 +62,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.InfixExpression:
 
 		if node.Operator == token.Assign {
-			if v := evalAssign(node, env); v != nil {
-				return v
-			}
-			return newError(node.Token.Pos, "cannot bind a literal to a value")
+			return evalAssign(node, env)
+		} else if node.Operator == token.Dot {
+			return evalClass(node, env)
 		}
 
 		left := Eval(node.Left, env)
@@ -415,8 +414,29 @@ func evalAssign(node *ast.InfixExpression, env *object.Environment) object.Objec
 		}
 		return newError(l.Token.Pos, "cannot assign value to variable '%s' that does not exist", l.Value)
 	default:
-		return nil
+		return newError(node.Token.Pos, "cannot bind a literal to a value")
 	}
+}
+
+func evalClass(node *ast.InfixExpression, env *object.Environment) object.Object {
+
+	left := Eval(node.Left, env)
+	if isError(left) {
+		return left
+	}
+
+	if left.Type() == object.FunctionType {
+		if right, ok := node.Right.(*ast.Identifier); ok {
+			left := left.(*object.Function)
+			if val, ok := left.Env.Get(right.Value); ok {
+				return val
+			}
+			return newError(node.Token.Pos, "identifer '%s' does not exist in context of function", right.Value)
+		}
+		return newError(node.Token.Pos, "rhs of '.' operator must be an identifier. Got '%s'", node.Right)
+	}
+
+	return newError(node.Token.Pos, "cannot use '.' operator on type '%s'. Must be function", left.Type())
 }
 
 func doFunction(t token.Token, f object.Object, args []object.Object) object.Object {

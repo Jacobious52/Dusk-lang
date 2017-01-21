@@ -167,6 +167,8 @@ func (l *Lexer) Next() (token.Token, error) {
 		tok = token.New(token.Comma, l.char, l.pos)
 	case ';':
 		tok = token.New(token.Terminator, l.char, l.pos)
+	case '.':
+		tok = token.New(token.Dot, l.char, l.pos)
 	case 0:
 		tok = token.New(token.EOF, l.char, l.pos)
 		if len(l.stack) > 0 {
