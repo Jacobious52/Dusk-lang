@@ -15,6 +15,7 @@ var builtins = map[string]*object.Builtin{
 	"first":   &object.Builtin{Fn: first},
 	"last":    &object.Builtin{Fn: last},
 	"rest":    &object.Builtin{Fn: rest},
+	"lead":    &object.Builtin{Fn: lead},
 	"push":    &object.Builtin{Fn: push},
 	"alloc":   &object.Builtin{Fn: alloc},
 	"set":     &object.Builtin{Fn: set},
@@ -104,6 +105,33 @@ func rest(args ...object.Object) object.Object {
 		if l > 0 {
 			newElems := make([]object.Object, l-1, l-1)
 			copy(newElems, arg.Elements[1:l])
+			return &object.Array{Elements: newElems}
+		}
+		return ConstNil
+	default:
+		return newError(token.Position{}, "argument to 'rest' not supported, got '%s'", args[0].Type())
+	}
+}
+
+func lead(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError(token.Position{}, "wrong number of arguments. got '%d', expected '1'", len(args))
+	}
+
+	switch arg := args[0].(type) {
+	case *object.String:
+		l := len(arg.Value)
+		if l > 0 {
+			newStr := make([]byte, l-1, l-1)
+			copy(newStr, arg.Value[:l-1])
+			return &object.String{Value: string(newStr)}
+		}
+		return ConstNil
+	case *object.Array:
+		l := len(arg.Elements)
+		if l > 0 {
+			newElems := make([]object.Object, l-1, l-1)
+			copy(newElems, arg.Elements[:l-1])
 			return &object.Array{Elements: newElems}
 		}
 		return ConstNil

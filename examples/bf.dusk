@@ -6,7 +6,7 @@
 
 // stack pointer and stack
 let sp = 0
-let stack = 1024::0 // create an array of 1024 zeros
+let stack = alloc(1024, 0) // create an array of 1024 zeros
 // note: range contructor 0..10 creates array from 0 to 9
 
 // instruction pointer
@@ -17,7 +17,7 @@ let src = ""
 // locations of the branch instruction '[' to jump back to
 let branches = []
 
-let leftBranch = ! {
+let leftBranch = || {
     if !stack[sp] {
         branches = push(branches, ip)
         while src[ip] != ']' {
@@ -27,30 +27,30 @@ let leftBranch = ! {
     }
 }
 
-let rightBranch = ! {
+let rightBranch = || {
     if stack[sp]: ip = pop(branches)
 }
 
 let opFunctions = {
-    '>' : ! sp += 1
-    '<' : ! sp -= 1
-    '+' : ! stack[sp] += 1
-    '-' : ! stack[sp] -= 1
-    '.' : ! show(stack[sp])
-    ',' : ! sp = readc!
+    '>' : || sp += 1
+    '<' : || sp -= 1
+    '+' : || stack[sp] += 1
+    '-' : || stack[sp] -= 1
+    '.' : || show(stack[sp])
+    ',' : || sp = readc!
     '[' : leftBranch
     ']' : rightBranch
 }
 
 let main = |args| {
-    src = reads!
+    src = readall!
 
     for instruction in src {
-        if src[ip] in opFunctions {
-            opFunctions(instruction)!
+        if instruction in opFunctions {
+            opFunctions[instruction]!
             sp += 1
         } else {
-            show("unknown instruction")
+            println("unknown instruction")
             break
         }
     }

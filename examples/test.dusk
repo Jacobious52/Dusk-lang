@@ -1,4 +1,15 @@
 
-print("what's your name? ")
-let name = readln!
-println("hello, " + name)
+print("give list of stuff <thing, thing, thing>: ")
+let stuff = readln!
+let things = split(stuff, ', ')
+
+let printThings = |things| {
+    if rest(things) {
+        println(first(things))
+        printThings(rest(things))
+    }
+}
+
+printThings(things)
+
+println("[alternately]", join(things, '\n'))
