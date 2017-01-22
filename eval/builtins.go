@@ -7,6 +7,7 @@ import (
 	"jacob/dusk/object"
 	"jacob/dusk/token"
 	"os"
+	"strings"
 )
 
 var builtins = map[string]*object.Builtin{
@@ -17,6 +18,8 @@ var builtins = map[string]*object.Builtin{
 	"push":    &object.Builtin{Fn: push},
 	"alloc":   &object.Builtin{Fn: alloc},
 	"set":     &object.Builtin{Fn: set},
+	"join":    &object.Builtin{Fn: join},
+	"split":   &object.Builtin{Fn: split},
 	"println": &object.Builtin{Fn: println},
 	"print":   &object.Builtin{Fn: print},
 	"readln":  &object.Builtin{Fn: readln},
@@ -166,6 +169,49 @@ func set(args ...object.Object) object.Object {
 		return newError(token.Position{}, "second argument to 'set' not supported, got '%s'", args[1].Type())
 	default:
 		return newError(token.Position{}, "argument to 'set' not supported, got '%s'", arg.Type())
+	}
+}
+
+func join(args ...object.Object) object.Object {
+	if len(args) != 2 {
+		return newError(token.Position{}, "wrong number of arguments. got '%d', expected '2'", len(args))
+	}
+
+	switch arg := args[0].(type) {
+	case *object.Array:
+		if s, ok := args[1].(*object.String); ok {
+			parts := make([]string, len(arg.Elements), len(arg.Elements))
+			for i := range arg.Elements {
+				parts[i] = arg.Elements[i].String()
+			}
+			return &object.String{Value: strings.Join(parts, s.Value)}
+		}
+		return newError(token.Position{}, "second argument to 'join' not supported, got '%s'", args[1].Type())
+	default:
+		return newError(token.Position{}, "argument to 'join' not supported, got '%s'", arg.Type())
+	}
+}
+
+func split(args ...object.Object) object.Object {
+	if len(args) != 2 {
+		return newError(token.Position{}, "wrong number of arguments. got '%d', expected '2'", len(args))
+	}
+
+	switch arg := args[0].(type) {
+	case *object.String:
+		if s, ok := args[1].(*object.String); ok {
+
+			parts := strings.Split(arg.Value, s.Value)
+
+			elems := make([]object.Object, len(parts), len(parts))
+			for i := range parts {
+				elems[i] = &object.String{Value: parts[i]}
+			}
+			return &object.Array{Elements: elems}
+		}
+		return newError(token.Position{}, "second argument to 'split' not supported, got '%s'", args[1].Type())
+	default:
+		return newError(token.Position{}, "argument to 'split' not supported, got '%s'", arg.Type())
 	}
 }
 
