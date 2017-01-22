@@ -54,7 +54,7 @@ type CallExpression struct {
 	Args  []Expression
 }
 
-// ExpressionStatement ::= (IntegerLiteral | FloatLiteral | StringLiteral | Operator | Identifier) Expression?
+// ExpressionStatement ::= (IntegerLiteral | FloatLiteral | StringLiteral | Operator | Identifier | PrefixExpression | InfixExpression | IndexExpression) Expression?
 type ExpressionStatement struct {
 	Token      token.Token // first token of the expression
 	Expression Expression
@@ -101,14 +101,25 @@ type FloatLiteral struct {
 
 // BooleanLiteral ::= True | False
 type BooleanLiteral struct {
-	// token.True | token.False
-	Token token.Token
+	Token token.Token // token.True | token.False
 	Value bool
 }
 
 // StringLiteral ::= "(a...z)"
 type StringLiteral struct {
-	// token.String
-	Token token.Token
+	Token token.Token // token.String
 	Value string
+}
+
+// ArrayLiteral ::= '[' (Expression ',')* ']'
+type ArrayLiteral struct {
+	Token    token.Token // token.LBracket
+	Elements []Expression
+}
+
+// IndexExpression ::= Expression '[' Expression ']'
+type IndexExpression struct {
+	Token token.Token // token.LBracket
+	Left  Expression
+	Index Expression
 }

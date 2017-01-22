@@ -2,7 +2,6 @@ package ast
 
 import (
 	"bytes"
-	"jacob/dusk/token"
 	"strings"
 )
 
@@ -97,6 +96,16 @@ func (s *StringLiteral) TokenLiteral() string {
 	return s.Token.Literal
 }
 
+// TokenLiteral for ArrayLiteral
+func (a *ArrayLiteral) TokenLiteral() string {
+	return a.Token.Literal
+}
+
+// TokenLiteral for IndexExpression
+func (i *IndexExpression) TokenLiteral() string {
+	return i.Token.Literal
+}
+
 // **---String-implementations---** //
 
 // String for Program
@@ -140,7 +149,7 @@ func (p *PrefixExpression) String() string {
 	return b.String()
 }
 
-// String for PrefixExpression
+// String for InfixExpression
 func (i *InfixExpression) String() string {
 	var b bytes.Buffer
 
@@ -151,6 +160,19 @@ func (i *InfixExpression) String() string {
 	b.WriteByte(' ')
 	b.WriteString(i.Right.String())
 	b.WriteString(")")
+
+	return b.String()
+}
+
+// String for IndexExpression
+func (i *IndexExpression) String() string {
+	var b bytes.Buffer
+
+	b.WriteByte('(')
+	b.WriteString(i.Left.String())
+	b.WriteByte('[')
+	b.WriteString(i.Index.String())
+	b.WriteString("])")
 
 	return b.String()
 }
@@ -210,18 +232,13 @@ func (f *FunctionLiteral) String() string {
 func (bs *BlockStatement) String() string {
 	var b bytes.Buffer
 
-	b.WriteString(bs.TokenLiteral())
-	b.WriteByte(' ')
+	b.WriteString("{ ")
 
 	for _, s := range bs.Statements {
 		b.WriteString(s.String())
 	}
 
-	b.WriteByte(' ')
-
-	if bs.Token.Type == token.LBrace {
-		b.WriteByte('}')
-	}
+	b.WriteString("}")
 
 	return b.String()
 }
@@ -239,6 +256,22 @@ func (c *CallExpression) String() string {
 	b.WriteByte('(')
 	b.WriteString(strings.Join(args, ", "))
 	b.WriteByte(')')
+
+	return b.String()
+}
+
+// String for ArrayLiteral
+func (a *ArrayLiteral) String() string {
+	var b bytes.Buffer
+
+	elems := []string{}
+	for _, e := range a.Elements {
+		elems = append(elems, e.String())
+	}
+
+	b.WriteByte('[')
+	b.WriteString(strings.Join(elems, ", "))
+	b.WriteByte(']')
 
 	return b.String()
 }
@@ -318,3 +351,5 @@ func (f *IfExpression) expressionNode()     {}
 func (f *FunctionLiteral) expressionNode()  {}
 func (c *CallExpression) expressionNode()   {}
 func (s *StringLiteral) expressionNode()    {}
+func (a *ArrayLiteral) expressionNode()     {}
+func (i *IndexExpression) expressionNode()  {}

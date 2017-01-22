@@ -33,6 +33,7 @@ const (
 	exp                   // ^ %
 	prefix                // -X or !X
 	call                  // f(x)
+	index                 // a[i]
 )
 
 var precedences = map[token.Type]precedence{
@@ -51,6 +52,7 @@ var precedences = map[token.Type]precedence{
 	token.Mod:      exp,
 	token.Inc:      assign,
 	token.Dec:      assign,
+	token.LBracket: index,
 }
 
 // Parser parses into a ast from the lexer
@@ -82,6 +84,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.If, p.parseIfExpression)
 	p.registerPrefix(token.Bar, p.parseFunctionLiteral)
 	p.registerPrefix(token.String, p.parseStringLiteral)
+	p.registerPrefix(token.LBracket, p.parseArrayLiteral)
 
 	p.infixParseFn = make(map[token.Type]infixParseFn)
 	p.registerInfix(token.Plus, p.parseInfixExpression)
@@ -99,7 +102,9 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.Greater, p.parseInfixExpression)
 	p.registerInfix(token.LParen, p.parseCallExpression)
 	p.registerInfix(token.Bang, p.parseCallExpression)
+	p.registerInfix(token.LBracket, p.parseIndexExpression)
 
+	// load the next token and current token
 	p.nextToken()
 	p.nextToken()
 
@@ -521,6 +526,54 @@ func (p *Parser) parseFloatLiteral() ast.Expression {
 
 func (p *Parser) parseStringLiteral() ast.Expression {
 	return &ast.StringLiteral{Token: p.current, Value: p.current.Literal}
+}
+
+func (p *Parser) parseArrayLiteral() ast.Expression {
+	arr := &ast.ArrayLiteral{Token: p.current}
+	arr.Elements = p.parseListElems()
+	return arr
+}
+
+func (p *Parser) parseListElems() []ast.Expression {
+	args := []ast.Expression{}
+
+	// '[]' empty params
+	if p.nextIs(token.RBracket) {
+		p.nextToken()
+		return args
+	}
+	p.nextToken()
+
+	// that means at least one arg. get it
+	args = append(args, p.parseExpression(lowest))
+
+	// keep getting params until no more commas
+	for p.nextIs(token.Comma) {
+		// swollow comma
+		p.nextToken()
+		p.nextToken()
+		args = append(args, p.parseExpression(lowest))
+	}
+
+	// must end with ]
+	if !p.expectNext(token.RBracket) {
+		return nil
+	}
+
+	return args
+}
+
+func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
+	expr := &ast.IndexExpression{Token: p.current, Left: left}
+	p.nextToken()
+
+	expr.Index = p.parseExpression(lowest)
+
+	if !p.expectNext(token.RBracket) {
+		return nil
+	}
+
+	return expr
 }
 
 func (p *Parser) parseBooleanExpression() ast.Expression {
