@@ -18,9 +18,10 @@ Dusk is a small project I've been working on in my spare time. For the purposes 
 - Classes by closures and '.' operator access
 
 ### Planned features:
-- Pairs
 - Maps
-- Interpolated formatting of strings e.g `"hello, \{person.name}"` 
+- For - in loops
+- Interpolated formatting of strings e.g `"hello, \{person.name}"`
+- Pairs
 - Modules
 - Bytecode compilation and evaluatation
 
@@ -32,17 +33,43 @@ let name = readln!
 
 println(name)
 ```
-
 ## Some examples
 ###let statements
 ```
 // let statements are the basis of creating variables
 
-let name = "friendo"    // bind a string literal
-let age = 20           // bind a int64 literal
-let height = 187.3    // bind a float64 literal
+let name = "friendo"             // bind a string literal
+let hobby = 'unit testing'      // bind another string using single quote
+let age = 20                   // bind a int64 literal
+let height = 187.3            // bind a float64 literal
+
+let array = [name, hobby, age, height] // put them into an array
 
 ```
+
+###operations on strings and arrays
+```
+let a = 'buddy'
+a[0]  // 'b'
+a[-1] // 'y'  arrays/strings wrap negatively around back to 0
+
+let chant = [2,4,6,8]
+chant = push(chant, "who do we appreciate?") // appends the string to the back of chant and returns the new array
+
+// alternately you can use the '+' or  '+=' to concat arrays
+chant += ["infix operators!"]
+
+
+// builtin string and array functions
+let a = [1,2,3,4]
+
+first(a)   // 1
+last(a)    // 4
+lead(a)    // 1,2,3
+rest(a)    // 2,3,4
+push(a, 5) // 1,2,3,4,5
+```
+
 ### functions
 ```
 // functions are literals aswell
