@@ -25,8 +25,8 @@ Dusk is a small project I've been working on in my spare time. For the purposes 
 - Modules
 - Bytecode compilation and evaluatation
 
-#Examples
-##Hello World
+# Examples
+## Hello World
 
 ```
 let name = readln! 
@@ -34,7 +34,7 @@ let name = readln!
 println(name)
 ```
 ## Some examples
-###let statements
+### let statements
 ```
 // let statements are the basis of creating variables
 
@@ -47,7 +47,7 @@ let array = [name, hobby, age, height] // put them into an array
 
 ```
 
-###operations on strings and arrays
+### operations on strings and arrays
 ```
 let a = 'buddy'
 a[0]  // 'b'
@@ -58,22 +58,42 @@ chant = push(chant, "who do we appreciate?") // appends the string to the back o
 
 // alternately you can use the '+' or  '+=' to concat arrays
 chant += ["infix operators!"]
+```
 
-
-// builtin string and array functions
+### Builtin functions
+```
+// basic array functions
 let a = [1,2,3,4]
-
+len(a)     // 4
 first(a)   // 1
 last(a)    // 4
-lead(a)    // 1,2,3
 rest(a)    // 2,3,4
 push(a, 5) // 1,2,3,4,5
+alloc(256, 'a') // creates an array of 256 a's.. can be any value
+set(a, 0, 6) // a[0] = 6,2,3,4
+
+// basic string functions
+let s = "hello, friend"
+split(s, '')     // splits s into an array of it's characters ['h', 'e', 'l', 'l' ... ]
+split(s, ', ')  // splits by ', '. ['hello', 'world']
+join(a, '')    // joins an array into a string of it's objects
+join(a, '.')  // joins with a '.' in between each element
+
+
+// i/o functions
+println
+print
+readln
+read
+readc
+readall
 ```
 
 ### functions
 ```
 // functions are literals aswell
 // functions are defined with the '|' arg1, arg2 '|' syntax
+// return statement is 'ret'
 
 // if a function only has one statement or expression it can directly follow the definition on the same line
 let birthday = || age += 1      // function with no args. increments age by 1
@@ -126,7 +146,7 @@ if a == 1 {
   "two"
 } else "huge!"
 ```
-###Closures
+### Closures
 ```
 // define a function that takes one arg and returns a function that sums it's argument together
 
@@ -142,7 +162,7 @@ let add2 = newAdder(2)
 add2(4) // 6
 ```
 
-###Classes
+### Classes
 ```
 let person = |n| {                          // person acts like a construtor returning a 'new' person
   let name = n                              // local variable 'name'
