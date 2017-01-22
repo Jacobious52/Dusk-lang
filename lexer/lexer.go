@@ -174,8 +174,8 @@ func (l *Lexer) Next() (token.Token, error) {
 		if len(l.stack) > 0 {
 			err = errors.New(fmt.Sprint("Unclosed ", l.stack[len(l.stack)-1]))
 		}
-	case '"':
-		tok = l.readString()
+	case '"', '\'':
+		tok, err = l.readString()
 	default:
 		if isLetter(l.char) {
 			return l.readIdentifier(), nil
@@ -257,18 +257,23 @@ func (l *Lexer) readNumber() token.Token {
 	return token.Token{Type: l.last, Literal: string(l.buff[p:l.curr]), Pos: pos}
 }
 
-func (l *Lexer) readString() token.Token {
+func (l *Lexer) readString() (token.Token, error) {
 	pos := l.pos
 
+	endc := l.char
+
 	p := l.curr + 1
-	for l.nextChar() != '"' {
+	for l.nextChar() != endc {
+		if l.char == 0 {
+			return token.Token{}, errors.New("String literal not closed")
+		}
 	}
 
 	str := string(l.buff[p:l.curr])
 	r := strings.NewReplacer("\\t", "\t", "\\n", "\n")
 	str = r.Replace(str)
 
-	return token.Token{Type: token.String, Literal: str, Pos: pos}
+	return token.Token{Type: token.String, Literal: str, Pos: pos}, nil
 }
 
 func (l *Lexer) nextChar() byte {

@@ -30,6 +30,8 @@ const (
 	FunctionType
 	// BuiltinType is a function in go
 	BuiltinType
+	// ArrayType is an array of any objects
+	ArrayType
 )
 
 // String for type
@@ -51,6 +53,8 @@ func (t Type) String() string {
 		return "function"
 	case BuiltinType:
 		return "builtin"
+	case ArrayType:
+		return "array"
 	default:
 		return "unknown"
 	}
@@ -286,4 +290,45 @@ func (b *Builtin) String() string {
 // CanApply for this type
 func (b *Builtin) CanApply(op token.Type, t Type) bool {
 	return false
+}
+
+// Array holds n objects
+type Array struct {
+	Elements []Object
+}
+
+// String for Array
+func (a *Array) String() string {
+	var b bytes.Buffer
+
+	elements := []string{}
+	for _, e := range a.Elements {
+		elements = append(elements, e.String())
+	}
+
+	b.WriteString("[")
+	b.WriteString(strings.Join(elements, ", "))
+	b.WriteString("]")
+
+	return b.String()
+}
+
+// Type for Array
+func (a *Array) Type() Type {
+	return ArrayType
+}
+
+// CanApply for this type
+func (a *Array) CanApply(op token.Type, t Type) bool {
+	switch op {
+	case token.Equal, token.NotEqual:
+		return true
+	case token.Plus:
+		if t == ArrayType {
+			return true
+		}
+		return false
+	default:
+		return false
+	}
 }

@@ -81,12 +81,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		return evalPrefixExpr(node.Token, right)
 	case *ast.InfixExpression:
-
 		if node.Operator == token.Assign {
 			return evalAssign(node, env)
-		} /*else if node.Operator == token.Dot {
-			return evalClass(node, env)
-		}*/
+		}
 
 		left := Eval(node.Left, env)
 		if isError(left) {
@@ -97,6 +94,17 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return right
 		}
 		return evalInfixExpr(node.Token, left, right)
+	case *ast.IndexExpression:
+		left := Eval(node.Left, env)
+		if isError(left) {
+			return left
+		}
+
+		index := Eval(node.Index, env)
+		if isError(index) {
+			return index
+		}
+		return evalIndexExpr(node.Token, left, index)
 	case *ast.IfExpression:
 		return evalIfExpr(node, env)
 	case *ast.CallExpression:
@@ -123,7 +131,12 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return &object.Function{Params: node.Params, Body: node.Body, Env: env}
 	case *ast.StringLiteral:
 		return &object.String{Value: node.Value}
-
+	case *ast.ArrayLiteral:
+		elems, err := evalExpressions(node.Elements, env)
+		if len(elems) == 1 && err != nil {
+			return err
+		}
+		return &object.Array{Elements: elems}
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
 	case *ast.AccessIdentifier:
@@ -239,10 +252,10 @@ func evalPrefixExpr(op token.Token, right object.Object) object.Object {
 	}
 }
 
-func evalInfixExpr(op token.Token, left object.Object, right object.Object) object.Object {
+func evalInfixExpr(op token.Token, left, right object.Object) object.Object {
 
 	// catch early type errors
-	if !left.CanApply(op.Type, right.Type()) {
+	if !left.CanApply(op.Type, right.Type()) && (op.Type != token.Equal && op.Type != token.NotEqual) {
 		return newError(op.Pos, "cannot apply operator '%s' for type '%s' and '%s'", op, left.Type(), right.Type())
 	}
 
@@ -279,6 +292,11 @@ func evalInfixExpr(op token.Token, left object.Object, right object.Object) obje
 		return evalStringInfixExpr(op, left, right)
 	}
 
+	// two arrays
+	if left.Type() == object.ArrayType && right.Type() == object.ArrayType {
+		return evalArrayInfixExpr(op, left, right)
+	}
+
 	// compare actual runtime object
 	if op.Type == token.Equal {
 		return boolToBoolean(left == right)
@@ -290,7 +308,50 @@ func evalInfixExpr(op token.Token, left object.Object, right object.Object) obje
 	return newError(op.Pos, "unknown operator '%s' for type '%s' and '%s'", op, left.Type(), right.Type())
 }
 
-func evalStringInfixExpr(op token.Token, left object.Object, right object.Object) object.Object {
+func evalIndexExpr(op token.Token, left, index object.Object) object.Object {
+	switch {
+	case left.Type() == object.ArrayType && index.Type() == object.IntType:
+		return evalArrayIndexExpr(op.Pos, left, index)
+	case left.Type() == object.StringType && index.Type() == object.IntType:
+		return evalStringIndexExpr(op.Pos, left, index)
+	default:
+		return newError(op.Pos, "index operator not supported on type '%s'", left.Type())
+	}
+}
+
+func evalArrayIndexExpr(pos token.Position, arr, index object.Object) object.Object {
+	array := arr.(*object.Array)
+	i := index.(*object.Integer).Value
+	max := int64(len(array.Elements) - 1)
+
+	if i < 0 {
+		i = max + i + 1
+	}
+
+	if i < 0 || i > max {
+		return newError(pos, "index '%d' out of bounds of array. Max '%d'", i, max)
+	}
+
+	return array.Elements[i]
+}
+
+func evalStringIndexExpr(pos token.Position, str, index object.Object) object.Object {
+	s := str.(*object.String)
+	i := index.(*object.Integer).Value
+	max := int64(len(s.Value) - 1)
+
+	if i < 0 {
+		i = max + i + 1
+	}
+
+	if i < 0 || i > max {
+		return newError(pos, "index '%d' out of bounds of string. Max '%d'", i, max)
+	}
+
+	return &object.String{Value: string(s.Value[i])}
+}
+
+func evalStringInfixExpr(op token.Token, left, right object.Object) object.Object {
 	leftVal := left.(*object.String).Value
 	rightVal := right.(*object.String).Value
 
@@ -306,7 +367,33 @@ func evalStringInfixExpr(op token.Token, left object.Object, right object.Object
 	}
 }
 
-func evalIntegerInfixExpr(op token.Token, left object.Object, right object.Object) object.Object {
+func evalArrayInfixExpr(op token.Token, left, right object.Object) object.Object {
+	leftVals := left.(*object.Array).Elements
+	rightVals := right.(*object.Array).Elements
+
+	switch op.Type {
+	case token.Plus:
+		return &object.Array{Elements: append(leftVals, rightVals...)}
+	case token.Equal:
+		for i := range leftVals {
+			if evalInfixExpr(op, leftVals[i], rightVals[i]) == ConstFalse {
+				return ConstFalse
+			}
+		}
+		return ConstTrue
+	case token.NotEqual:
+		for i := range leftVals {
+			if evalInfixExpr(op, leftVals[i], rightVals[i]) == ConstFalse {
+				return ConstTrue
+			}
+		}
+		return ConstFalse
+	default:
+		return newError(op.Pos, "unknown operator '%s' for type '%s' and '%s'", op.Type, left.Type(), right.Type())
+	}
+}
+
+func evalIntegerInfixExpr(op token.Token, left, right object.Object) object.Object {
 	leftVal := left.(*object.Integer).Value
 	rightVal := right.(*object.Integer).Value
 
@@ -342,7 +429,7 @@ func evalIntegerInfixExpr(op token.Token, left object.Object, right object.Objec
 	}
 }
 
-func evalFloatInfixExpr(op token.Token, left object.Object, right object.Object) object.Object {
+func evalFloatInfixExpr(op token.Token, left, right object.Object) object.Object {
 	leftVal := left.(*object.Float).Value
 	rightVal := right.(*object.Float).Value
 
