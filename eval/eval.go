@@ -2,9 +2,9 @@ package eval
 
 import (
 	"fmt"
-	"jacob/black/ast"
-	"jacob/black/object"
-	"jacob/black/token"
+	"jacob/dusk/ast"
+	"jacob/dusk/object"
+	"jacob/dusk/token"
 	"math"
 )
 

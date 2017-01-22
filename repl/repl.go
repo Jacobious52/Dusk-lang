@@ -5,16 +5,16 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"jacob/black/eval"
-	"jacob/black/lexer"
-	"jacob/black/object"
-	"jacob/black/parser"
+	"jacob/dusk/eval"
+	"jacob/dusk/lexer"
+	"jacob/dusk/object"
+	"jacob/dusk/parser"
 	"strings"
 )
 
 const (
 	prompt = "| "
-	intro  = "\033[2J\033[0;0HBlack Programming Langaguge (Repl). © Jacob Gonzalez 2017\n\n"
+	intro  = "\033[2J\033[0;0HDusk Programming Langaguge (Repl). © Jacob Gonzalez 2017\n\n"
 )
 
 type colorCode int8

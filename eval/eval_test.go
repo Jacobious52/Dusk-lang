@@ -1,9 +1,9 @@
 package eval
 
 import (
-	"jacob/black/lexer"
-	"jacob/black/object"
-	"jacob/black/parser"
+	"jacob/dusk/lexer"
+	"jacob/dusk/object"
+	"jacob/dusk/parser"
 	"testing"
 )
 

@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"jacob/black/token"
+	"jacob/dusk/token"
 	"testing"
 )
 

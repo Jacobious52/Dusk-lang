@@ -1,8 +1,8 @@
 package eval
 
 import (
-	"jacob/black/object"
-	"jacob/black/token"
+	"jacob/dusk/object"
+	"jacob/dusk/token"
 )
 
 var builtins = map[string]*object.Builtin{

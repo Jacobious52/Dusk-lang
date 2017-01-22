@@ -2,7 +2,7 @@ package ast
 
 import (
 	"bytes"
-	"jacob/black/token"
+	"jacob/dusk/token"
 	"strings"
 )
 

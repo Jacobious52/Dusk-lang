@@ -1,7 +1,7 @@
 package main
 
 import (
-	"jacob/black/repl"
+	"jacob/dusk/repl"
 	"os"
 )
 

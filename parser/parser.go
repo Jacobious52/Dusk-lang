@@ -2,9 +2,9 @@ package parser
 
 import (
 	"fmt"
-	"jacob/black/ast"
-	"jacob/black/lexer"
-	"jacob/black/token"
+	"jacob/dusk/ast"
+	"jacob/dusk/lexer"
+	"jacob/dusk/token"
 	"strconv"
 )
 
