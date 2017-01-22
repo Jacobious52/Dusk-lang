@@ -408,6 +408,11 @@ func evalIdentifier(id *ast.Identifier, env *object.Environment) object.Object {
 	if val, ok := env.Get(id.Value); ok {
 		return val
 	}
+
+	if builtin, ok := builtins[id.Value]; ok {
+		return builtin
+	}
+
 	return newError(id.Token.Pos, "identifier not found: %s", id.Value)
 }
 
@@ -421,6 +426,11 @@ func evalAccessIdentifier(id *ast.AccessIdentifier, env *object.Environment) obj
 	if val, ok := bottom.Get(last); ok {
 		return val
 	}
+
+	if builtin, ok := builtins[last]; ok {
+		return builtin
+	}
+
 	return newError(id.Token.Pos, "identifier not found in context: %s", last)
 }
 
@@ -470,23 +480,26 @@ func evalAssign(node *ast.InfixExpression, env *object.Environment) object.Objec
 }
 
 func doFunction(t token.Token, f object.Object, args []object.Object) object.Object {
-	function, ok := f.(*object.Function)
-	if !ok {
+
+	switch function := f.(type) {
+	case *object.Function:
+		if len(function.Params) != len(args) {
+			return newError(t.Pos, "invalid number of arguments for function. Expected %d got %d", len(function.Params), len(args))
+		}
+
+		childEnv := adoptFunctionEnv(function, args)
+		evaluated := Eval(function.Body, childEnv)
+
+		if val, ok := evaluated.(*object.ReturnValue); ok {
+			return val.Value
+		}
+
+		return evaluated
+	case *object.Builtin:
+		return function.Fn(args...)
+	default:
 		return newError(t.Pos, "type '%s' not a function", f.Type())
 	}
-
-	if len(function.Params) != len(args) {
-		return newError(t.Pos, "invalid number of arguments for function. Expected %d got %d", len(function.Params), len(args))
-	}
-
-	childEnv := adoptFunctionEnv(function, args)
-	evaluated := Eval(function.Body, childEnv)
-
-	if val, ok := evaluated.(*object.ReturnValue); ok {
-		return val.Value
-	}
-
-	return evaluated
 }
 
 func adoptFunctionEnv(f *object.Function, args []object.Object) *object.Environment {

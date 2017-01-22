@@ -28,6 +28,8 @@ const (
 	ErrorType
 	// FunctionType is a closure
 	FunctionType
+	// BuiltinType is a function in go
+	BuiltinType
 )
 
 // String for type
@@ -47,6 +49,8 @@ func (t Type) String() string {
 		return "error"
 	case FunctionType:
 		return "function"
+	case BuiltinType:
+		return "builtin"
 	default:
 		return "unknown"
 	}
@@ -258,5 +262,28 @@ func (f *Function) Type() Type {
 
 // CanApply for this type
 func (f *Function) CanApply(op token.Type, t Type) bool {
+	return false
+}
+
+// BuiltinFunction is a function with n args
+type BuiltinFunction func(args ...Object) Object
+
+// Builtin is a builtin go function
+type Builtin struct {
+	Fn BuiltinFunction
+}
+
+// Type for Builtin
+func (b *Builtin) Type() Type {
+	return BuiltinType
+}
+
+// String for Builtin
+func (b *Builtin) String() string {
+	return "builtin function"
+}
+
+// CanApply for this type
+func (b *Builtin) CanApply(op token.Type, t Type) bool {
 	return false
 }
