@@ -20,6 +20,7 @@ Dusk is a small project I've been working on in my spare time. For the purposes 
 ### Planned features:
 - Pairs
 - Maps
+- Interpolated formatting of strings e.g `"hello, \{person.name}"` 
 - Modules
 - Bytecode compilation and evaluatation
 
