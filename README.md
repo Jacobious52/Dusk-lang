@@ -1,7 +1,7 @@
 # Dusk-lang
 Dusk Language interpreter
 
-Dusk is a small project I've been working on in my spare time. For the purposes of learning to design/lex/parse/evaluate a programming that's a little more than a 'toy language'
+Dusk is a small project I've been working on in my spare time. For the purposes of learning to design/lex/parse/evaluate a programming language that's a little more than a 'toy language'
 
 ### So far Dusk features are:
 
