@@ -68,6 +68,7 @@ len(a)     // 4
 first(a)   // 1
 last(a)    // 4
 rest(a)    // 2,3,4
+lead(a)    // 1,2,3
 push(a, 5) // 1,2,3,4,5
 alloc(256, 'a') // creates an array of 256 a's.. can be any value
 set(a, 0, 6) // a[0] = 6,2,3,4
