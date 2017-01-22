@@ -63,10 +63,10 @@ chant += ["infix operators!"]
 // builtin string and array functions
 let a = [1,2,3,4]
 
-first(a)       // 1
-last(a)       // 4
-lead(a)      // 1,2,3
-rest(a)     // 2,3,4
+first(a)   // 1
+last(a)    // 4
+lead(a)    // 1,2,3
+rest(a)    // 2,3,4
 push(a, 5) // 1,2,3,4,5
 ```
 
