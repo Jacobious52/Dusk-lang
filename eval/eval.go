@@ -539,6 +539,46 @@ func evalAssign(node *ast.InfixExpression, env *object.Environment) object.Objec
 
 		id = last
 		bottom = b
+	case *ast.IndexExpression:
+		array := Eval(l.Left, env)
+		if isError(array) {
+			return array
+		}
+		if array.Type() != object.ArrayType {
+			return newError(l.Token.Pos, "index operator assign not supported on type '%s'", array.Type())
+		}
+		a := array.(*object.Array)
+
+		index := Eval(l.Index, env)
+		if isError(index) {
+			return index
+		}
+		if index.Type() != object.IntType {
+			return newError(l.Token.Pos, "index must be type 'int'. got type '%s'", index.Type())
+		}
+		i := index.(*object.Integer).Value
+
+		max := int64(len(a.Elements) - 1)
+		if i < 0 {
+			i = max + i + 1
+		}
+
+		if i < 0 || i > max {
+			return newError(l.Token.Pos, "index '%d' out of bounds of array. Max '%d'", i, max)
+		}
+
+		right := Eval(node.Right, env)
+		if isError(right) {
+			return right
+		}
+
+		if array == right {
+			return newError(l.Token.Pos, "cannot assign index of array to self")
+		}
+
+		array.(*object.Array).Elements[index.(*object.Integer).Value] = right
+		return right
+
 	default:
 		return newError(node.Token.Pos, "cannot bind a literal to a value")
 	}

@@ -163,9 +163,9 @@ func set(args ...object.Object) object.Object {
 			arg.Elements[i.Value] = args[2]
 			return ConstNil
 		}
-		return newError(token.Position{}, "second argument to 'alloc' not supported, got '%s'", args[1].Type())
+		return newError(token.Position{}, "second argument to 'set' not supported, got '%s'", args[1].Type())
 	default:
-		return newError(token.Position{}, "argument to 'alloc' not supported, got '%s'", arg.Type())
+		return newError(token.Position{}, "argument to 'set' not supported, got '%s'", arg.Type())
 	}
 }
 
