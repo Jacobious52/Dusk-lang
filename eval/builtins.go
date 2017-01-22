@@ -1,9 +1,11 @@
 package eval
 
 import (
+	"bufio"
 	"fmt"
 	"jacob/dusk/object"
 	"jacob/dusk/token"
+	"os"
 )
 
 var builtins = map[string]*object.Builtin{
@@ -145,10 +147,10 @@ func readln(args ...object.Object) object.Object {
 		return newError(token.Position{}, "readln does not take any arguments. given '%d'", len(args))
 	}
 
-	s := ""
-	fmt.Scanln(&s)
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
 
-	return &object.String{Value: s}
+	return &object.String{Value: scanner.Text()}
 }
 
 func read(args ...object.Object) object.Object {
@@ -157,7 +159,7 @@ func read(args ...object.Object) object.Object {
 	}
 
 	s := ""
-	fmt.Scan(&s)
+	fmt.Scanln(&s)
 
 	return &object.String{Value: s}
 }
@@ -168,7 +170,7 @@ func readc(args ...object.Object) object.Object {
 	}
 
 	var c byte
-	fmt.Scan(c)
+	fmt.Scanf("%c", &c)
 
 	return &object.String{Value: string(c)}
 }
