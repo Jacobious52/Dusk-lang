@@ -33,3 +33,13 @@ func (e *Environment) Set(name string, val Object) Object {
 	e.vars[name] = val
 	return val
 }
+
+// Assign a existing value in the varibles map
+func (e *Environment) Assign(name string, val Object) (Object, bool) {
+	_, ok := e.vars[name]
+	if !ok && e.parent != nil {
+		return e.parent.Assign(name, val)
+	}
+	e.vars[name] = val
+	return val, ok
+}

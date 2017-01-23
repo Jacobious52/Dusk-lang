@@ -28,6 +28,8 @@ var builtins = map[string]*object.Builtin{
 	"read":    &object.Builtin{Fn: read},
 	"readc":   &object.Builtin{Fn: readc},
 	"readall": &object.Builtin{Fn: readall},
+	"atoi":    &object.Builtin{Fn: atoi},
+	"itoa":    &object.Builtin{Fn: itoa},
 }
 
 func length(args ...object.Object) object.Object {
@@ -137,7 +139,7 @@ func lead(args ...object.Object) object.Object {
 		}
 		return ConstNil
 	default:
-		return newError(token.Position{}, "argument to 'rest' not supported, got '%s'", args[0].Type())
+		return newError(token.Position{}, "argument to 'lead' not supported, got '%s'", args[0].Type())
 	}
 }
 
@@ -326,4 +328,37 @@ func readall(args ...object.Object) object.Object {
 	s, _ := ioutil.ReadAll(os.Stdin)
 
 	return &object.String{Value: string(s)}
+}
+
+func atoi(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError(token.Position{}, "wrong number of arguments. got '%d', expected '1'", len(args))
+	}
+
+	switch arg := args[0].(type) {
+	case *object.String:
+		l := len(arg.Value)
+		if l == 1 {
+			return &object.Integer{Value: int64(arg.Value[0])}
+		}
+		return newError(token.Position{}, "argument to 'atoi must be string with length of 1. Got '%d'", l)
+	default:
+		return newError(token.Position{}, "argument to 'atoi' not supported, got '%s'", args[0].Type())
+	}
+}
+
+func itoa(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError(token.Position{}, "wrong number of arguments. got '%d', expected '1'", len(args))
+	}
+
+	switch arg := args[0].(type) {
+	case *object.Integer:
+		if arg.Value >= 0 && arg.Value < 256 {
+			return &object.String{Value: string(byte(arg.Value))}
+		}
+		return newError(token.Position{}, "argument to 'atoi must be between 0 and 256 Got '%d'", arg.Value)
+	default:
+		return newError(token.Position{}, "argument to 'atoi' not supported, got '%s'", args[0].Type())
+	}
 }

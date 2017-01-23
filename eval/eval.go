@@ -599,8 +599,11 @@ func evalAssign(node *ast.InfixExpression, env *object.Environment) object.Objec
 
 		// must be same type
 		if val.Type() == right.Type() {
-			bottom.Set(id, right)
-			return right
+			v, ok := bottom.Assign(id, right)
+			if ok {
+				return v
+			}
+			return newError(node.Token.Pos, "cannot assign value to variable '%s' that does not exist", id)
 		}
 
 		return newError(node.Token.Pos, "cannot assign variable '%s' of type '%s' to value '%s' of type '%s'", id, val.Type(), right, right.Type())

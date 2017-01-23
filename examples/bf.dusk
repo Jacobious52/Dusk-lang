@@ -1,61 +1,48 @@
 
-// as to be compatable in 0.1
-// 0.2 will add stuff like
-// multple let assignments e.g (let a, b = 0)
-// reverse function calling syntax  e.g (let b = a1.a2.call(a3))
-
-// stack pointer and stack
 let sp = 0
-let stack = alloc(1024, 0) // create an array of 1024 zeros
-// note: range contructor 0..10 creates array from 0 to 9
+let stack = alloc(1024, 0)
+let jumps = []
 
-// instruction pointer
-let ip = 0
-// source string. opcodes
-let src = ""
-
-// locations of the branch instruction '[' to jump back to
-let branches = []
-
-let leftBranch = || {
-    if !stack[sp] {
-        branches = push(branches, ip)
-        while src[ip] != ']' {
-            if ip > len(src)-1: break
-            ip+=1
-        }
+let iter = |src, ip, f| {
+    if ip < len(src) {
+        ip = f(src, ip)
+        iter(src, ip, f)
     }
 }
 
-let rightBranch = || {
-    if stack[sp]: ip = pop(branches)
-}
+let eval = |src, ip| {
+    let op = src[ip]
 
-let opFunctions = {
-    '>' : || sp += 1
-    '<' : || sp -= 1
-    '+' : || stack[sp] += 1
-    '-' : || stack[sp] -= 1
-    '.' : || show(stack[sp])
-    ',' : || sp = readc!
-    '[' : leftBranch
-    ']' : rightBranch
-}
-
-let main = |args| {
-    src = readall!
-
-    for instruction in src {
-        if instruction in opFunctions {
-            opFunctions[instruction]!
-            sp += 1
-        } else {
-            println("unknown instruction")
-            break
+    if op == '>': sp+=1
+    else if op == '<': sp-=1
+    else if op == '+': stack[sp] += 1
+    else if op == '-': stack[sp] -= 1
+    else if op == '.': print(itoa(stack[sp]))
+    else if op == ',': stack[sp] = atoi(readc!)
+    else if op == '[' {
+        jumps = push(jumps, ip)
+        if stack[sp] == 0 {
+            let skip = |ip, bal| {
+                if bal == 0: ip
+                else if src[ip] == '[': skip(ip+1, bal+1)
+                else if src[ip] == ']': skip(ip+1, bal-1)
+                else skip(ip+1, bal)
+            }
+            ip = skip(ip, 1)
+        }
+    } else if op == ']' {
+        if stack[sp] != 0 {
+            if last(jumps) == nil: println("\nerror\n")
+            else ip = pop(jumps)-1
         }
     }
 
-    ret 0
+    ret ip+1
+}
+
+let main = || {
+    let src = readln!
+    iter(src, 0, eval)
 }
 
 main!
