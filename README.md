@@ -180,4 +180,14 @@ p2.sayhi!          // prints "hello, kyle"
 
 ```
 
+## Building source
+Place contents in `$GOPATH/src/jacob/dusk`
+`go build`
+`./dust` to start repl
+`./dust file.dusk` to just run file
 
+
+#### reference:
+Ball, Thorsten. “Writing An Interpreter In Go.” 2016
+My main guide for designing the internal interpreters structure. Used his tests for checking correctness.
+It's a great book that I suggest if you want to write a programming language with more advanced features then most online literture. However always right the code yourself and change it so it fits with your idea of the program, adding and removing elements
