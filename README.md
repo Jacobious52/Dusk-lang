@@ -17,13 +17,35 @@ Dusk is a small project I've been working on in my spare time. For the purposes 
 - Closures
 - Classes by closures and '.' operator access
 
+### Next to be implemented
+- HashMaps
+
 ### Planned features:
-- Maps
+
 - For - in loops
 - Interpolated formatting of strings e.g `"hello, \{person.name}"`
 - Pairs
 - Modules
 - Bytecode compilation and evaluatation
+
+# Keywords
+There is a small set of keywords to keep the language simple. Most functionality comes from expressions and symbols
+
+- let    
+`let a = "hello"`
+- if  
+`if a == "hello": sayhi!`
+- else
+`if a == "hello": sayhi! else saybye!`
+- ret
+`ret 4` 
+- true
+`let b = true`
+- false
+`let b = false`
+- nil
+`if pop(a) == nil: "error"`
+`if !pop(a): "error"`
 
 # Examples
 ## Hello World
@@ -70,6 +92,7 @@ last(a)    // 4
 rest(a)    // 2,3,4
 lead(a)    // 1,2,3
 push(a, 5) // 1,2,3,4,5
+pop(a)     // 1,2,3,4
 alloc(256, 'a') // creates an array of 256 a's.. can be any value
 set(a, 0, 6) // a[0] = 6,2,3,4
 
