@@ -61,6 +61,11 @@ func (b *BooleanLiteral) TokenLiteral() string {
 	return b.Token.Literal
 }
 
+// TokenLiteral for NilLiteral
+func (n *NilLiteral) TokenLiteral() string {
+	return n.Token.Literal
+}
+
 // TokenLiteral for PrefixExpression
 func (p *PrefixExpression) TokenLiteral() string {
 	return p.Token.Literal
@@ -314,6 +319,11 @@ func (b *BooleanLiteral) String() string {
 	return b.Token.Literal
 }
 
+// String for NilLiteral
+func (n *NilLiteral) String() string {
+	return n.Token.Literal
+}
+
 // String for StringLiteral
 func (s *StringLiteral) String() string {
 	return s.Token.String()
@@ -353,3 +363,4 @@ func (c *CallExpression) expressionNode()   {}
 func (s *StringLiteral) expressionNode()    {}
 func (a *ArrayLiteral) expressionNode()     {}
 func (i *IndexExpression) expressionNode()  {}
+func (n *NilLiteral) expressionNode()       {}

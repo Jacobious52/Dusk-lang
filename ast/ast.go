@@ -105,6 +105,11 @@ type BooleanLiteral struct {
 	Value bool
 }
 
+// NilLiteral ::= Nil
+type NilLiteral struct {
+	Token token.Token // token.Nil
+}
+
 // StringLiteral ::= "(a...z)"
 type StringLiteral struct {
 	Token token.Token // token.String

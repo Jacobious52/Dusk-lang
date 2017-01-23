@@ -17,6 +17,7 @@ var builtins = map[string]*object.Builtin{
 	"rest":    &object.Builtin{Fn: rest},
 	"lead":    &object.Builtin{Fn: lead},
 	"push":    &object.Builtin{Fn: push},
+	"pop":     &object.Builtin{Fn: pop},
 	"alloc":   &object.Builtin{Fn: alloc},
 	"set":     &object.Builtin{Fn: set},
 	"join":    &object.Builtin{Fn: join},
@@ -160,6 +161,33 @@ func push(args ...object.Object) object.Object {
 		return &object.Array{Elements: newElems}
 	default:
 		return newError(token.Position{}, "argument to 'push' not supported, got '%s'", args[0].Type())
+	}
+}
+
+func pop(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError(token.Position{}, "wrong number of arguments. got '%d', expected '1'", len(args))
+	}
+
+	switch arg := args[0].(type) {
+	case *object.String:
+		l := len(arg.Value)
+		if l > 0 {
+			p := arg.Value[l-1]
+			arg.Value = arg.Value[:l-1]
+			return &object.String{Value: string(p)}
+		}
+		return ConstNil
+	case *object.Array:
+		l := len(arg.Elements)
+		if l > 0 {
+			p := arg.Elements[l-1]
+			arg.Elements = arg.Elements[:l-1]
+			return p
+		}
+		return ConstNil
+	default:
+		return newError(token.Position{}, "argument to 'pop' not supported, got '%s'", args[0].Type())
 	}
 }
 

@@ -127,6 +127,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return &object.Float{Value: node.Value}
 	case *ast.BooleanLiteral:
 		return boolToBoolean(node.Value)
+	case *ast.NilLiteral:
+		return ConstNil
 	case *ast.FunctionLiteral:
 		return &object.Function{Params: node.Params, Body: node.Body, Env: env}
 	case *ast.StringLiteral:

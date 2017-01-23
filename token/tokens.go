@@ -50,6 +50,7 @@ const (
 	Return // Ret keyword
 	True   // True keyword
 	False  // False keyword
+	Nil    // nil keyword
 )
 
 // LookupLiteral returns string for type
@@ -130,6 +131,8 @@ func (t Type) String() string {
 		return "for"
 	case Return:
 		return "ret"
+	case Nil:
+		return "nil"
 	default:
 		return "unknown"
 	}
@@ -144,4 +147,5 @@ var keywords = map[string]Type{
 	"true":  True,
 	"for":   For,
 	"ret":   Return,
+	"nil":   Nil,
 }
