@@ -51,11 +51,16 @@ There is a small set of keywords to keep the language simple. Most functionality
 ## Hello World
 
 ```
-let name = readln! 
-
+let name = readln!
 println(name)
 ```
-## Some examples
+
+## More examples can be found in the examples folder
+map and reduce functional examples
+
+'bf' interpreter. WIP
+
+## Some langauge examples
 ### let statements
 ```
 // let statements are the basis of creating variables
@@ -103,7 +108,6 @@ split(s, ', ')  // splits by ', '. ['hello', 'world']
 join(a, '')    // joins an array into a string of it's objects
 join(a, '.')  // joins with a '.' in between each element
 
-
 // i/o functions
 println
 print
@@ -111,6 +115,10 @@ readln
 read
 readc
 readall
+
+// conversion
+atoi('a')  // 97
+itoa(97)   // 'a'
 ```
 
 ### functions
