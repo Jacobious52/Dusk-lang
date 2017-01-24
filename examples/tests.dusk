@@ -13,13 +13,3 @@ let printThings = |things| {
 printThings(things)
 
 println("[alternately]", join(things, '\n'))
-
-let map = |arr, f| {
-    let iter = |arr, acc|{
-        if len(arr) == 0: acc
-        else {
-            iter(rest(arr), push(acc, f(first(arr))))
-        }
-    }
-    iter(arr, [])
-}

@@ -1,0 +1,32 @@
+
+let map = |arr, f| {
+    let iter = |arr, acc|{
+        if len(arr) == 0: acc
+        else {
+            iter(rest(arr), push(acc, f(first(arr))))
+        }
+    }
+    iter(arr, [])
+}
+
+let reduce = |arr, init, f| {
+    let iter = |arr, acc| {
+        if len(arr) == 0: acc
+        else {
+            iter(rest(arr), f(acc, first(arr)))
+        }
+    }
+    iter(arr, init)
+}
+
+println('[map]')
+
+let names = ['tim', 'jim', 'bim', 'sim']
+names = map(names, |n| push(n, ' is cool'))
+println(join(names, '\n'))
+
+println('[reduce]')
+
+let nums = [1,2,3,4,5,6,7,8,9,10]
+let sum = |arr| reduce(arr, 0, |a, b| a+b)
+print(join(nums, '+'), ' = ', sum(nums), '\n')
