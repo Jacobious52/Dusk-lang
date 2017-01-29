@@ -9,9 +9,9 @@ func TestNextToken(t *testing.T) {
 
 	input := `let five = 5
 let ten = 10.2342
-
+// add two numbers
 let add = |x, y| {
-	x + y
+	x + y // x + y
 }
 
 let result = add(five, ten)

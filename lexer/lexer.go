@@ -117,9 +117,10 @@ func (l *Lexer) Next() (token.Token, error) {
 	case '/':
 		if l.peekChar() == '/' {
 			l.consumeComment()
-		} else {
-			tok = token.New(token.Divide, l.char, l.pos)
+			return l.Next()
 		}
+		tok = token.New(token.Divide, l.char, l.pos)
+
 	case '^':
 		tok = token.New(token.Exp, l.char, l.pos)
 	case '%':
