@@ -13,6 +13,8 @@ Dusk is a small project I've been working on in my spare time. For the purposes 
 - 64 bit Floats
 - Strings
 - Arrays
+- If Expressions
+- While Expressions
 - First class functions
 - Closures
 - Classes by closures and '.' operator access
@@ -22,11 +24,15 @@ Dusk is a small project I've been working on in my spare time. For the purposes 
 
 ### Planned features:
 
-- For - in loops
+- For in loops
+- Range infix operator constructor. e.g. 1..5 => [1,2,3,4,5]
 - Interpolated formatting of strings e.g `"hello, \{person.name}"`
 - Pairs
+
+### Maybe in the future
+
 - Modules
-- Bytecode compilation and evaluatation
+- Bytecode compilation and evaluatation with vm
 
 # Keywords
 There is a small set of keywords to keep the language simple. Most functionality comes from expressions and symbols
@@ -35,6 +41,9 @@ There is a small set of keywords to keep the language simple. Most functionality
 `let a = "hello"`
 - if  
 `if a == "hello": sayhi!`
+- while
+`while a > 0: sayhi!`
+`while p = pop(a): println(p)`
 - else
 `if a == "hello": sayhi! else saybye!`
 - ret
