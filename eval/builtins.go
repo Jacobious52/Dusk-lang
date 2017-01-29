@@ -304,7 +304,7 @@ func read(args ...object.Object) object.Object {
 	}
 
 	s := ""
-	fmt.Scanln(&s)
+	fmt.Scan(&s)
 
 	return &object.String{Value: s}
 }
@@ -314,8 +314,11 @@ func readc(args ...object.Object) object.Object {
 		return newError(token.Position{}, "readln does not take any arguments. given '%d'", len(args))
 	}
 
-	var c byte
-	fmt.Scanf("%c", &c)
+	reader := bufio.NewReader(os.Stdin)
+	c, e := reader.ReadByte()
+	if e != nil {
+		return ConstNil
+	}
 
 	return &object.String{Value: string(c)}
 }

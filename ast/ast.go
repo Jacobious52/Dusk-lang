@@ -34,6 +34,13 @@ type IfExpression struct {
 	Else  *BlockStatement
 }
 
+// WhileExpression ::= 'while' expression ('{' | ':') BlockStatement '}'? 'else' ('{' | ':')? BlockStatement '}'?
+type WhileExpression struct {
+	Token token.Token // token.While
+	Cond  Expression
+	Do    *BlockStatement
+}
+
 // FunctionLiteral ::= '|' (Identifier | (Identifier ',')?)* ('{' | ':')? BlockStatement '}'?
 type FunctionLiteral struct {
 	Token  token.Token // The first '|' bar token

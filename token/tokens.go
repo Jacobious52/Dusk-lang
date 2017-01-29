@@ -46,7 +46,7 @@ const (
 	Let    // Let keyword
 	If     // If keyword
 	Else   // Else keyword
-	For    // For keyword
+	While  // For keyword
 	Return // Ret keyword
 	True   // True keyword
 	False  // False keyword
@@ -127,8 +127,8 @@ func (t Type) String() string {
 		return "false"
 	case True:
 		return "true"
-	case For:
-		return "for"
+	case While:
+		return "while"
 	case Return:
 		return "ret"
 	case Nil:
@@ -145,7 +145,7 @@ var keywords = map[string]Type{
 	"else":  Else,
 	"false": False,
 	"true":  True,
-	"for":   For,
+	"while": While,
 	"ret":   Return,
 	"nil":   Nil,
 }

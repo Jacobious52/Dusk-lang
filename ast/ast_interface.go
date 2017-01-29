@@ -81,6 +81,11 @@ func (f *IfExpression) TokenLiteral() string {
 	return f.Token.Literal
 }
 
+// TokenLiteral for WhileExpression
+func (w *WhileExpression) TokenLiteral() string {
+	return w.Token.Literal
+}
+
 // TokenLiteral for FunctionLiteral
 func (f *FunctionLiteral) TokenLiteral() string {
 	return f.Token.Literal
@@ -211,6 +216,18 @@ func (f *IfExpression) String() string {
 		b.WriteString(" else ")
 		b.WriteString(f.Else.String())
 	}
+
+	return b.String()
+}
+
+// String for WhileExpression
+func (w *WhileExpression) String() string {
+	var b bytes.Buffer
+
+	b.WriteString("while ")
+	b.WriteString(w.Cond.String())
+	b.WriteByte(' ')
+	b.WriteString(w.Do.String())
 
 	return b.String()
 }
@@ -358,6 +375,7 @@ func (p *PrefixExpression) expressionNode() {}
 func (i *InfixExpression) expressionNode()  {}
 func (b *BooleanLiteral) expressionNode()   {}
 func (f *IfExpression) expressionNode()     {}
+func (w *WhileExpression) expressionNode()  {}
 func (f *FunctionLiteral) expressionNode()  {}
 func (c *CallExpression) expressionNode()   {}
 func (s *StringLiteral) expressionNode()    {}

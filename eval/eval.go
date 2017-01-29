@@ -107,6 +107,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalIndexExpr(node.Token, left, index)
 	case *ast.IfExpression:
 		return evalIfExpr(node, env)
+	case *ast.WhileExpression:
+		return evalWhileExpr(node, env)
 	case *ast.CallExpression:
 		function := Eval(node.Func, env)
 		if isError(function) {
@@ -200,7 +202,6 @@ func evalExpressions(expressions []ast.Expression, env *object.Environment) ([]o
 
 func evalIfExpr(node *ast.IfExpression, env *object.Environment) object.Object {
 	cond := Eval(node.Cond, env)
-
 	if isError(cond) {
 		return cond
 	}
@@ -212,6 +213,23 @@ func evalIfExpr(node *ast.IfExpression, env *object.Environment) object.Object {
 	}
 
 	return ConstNil
+}
+
+func evalWhileExpr(node *ast.WhileExpression, env *object.Environment) object.Object {
+	var lastEval object.Object = ConstNil
+
+	for {
+		cond := Eval(node.Cond, env)
+		if isError(cond) {
+			return cond
+		}
+
+		if !isTruthy(cond) {
+			return lastEval
+		}
+
+		lastEval = Eval(node.Do, env)
+	}
 }
 
 // isTruthy - everything is true execpt for false and nil
@@ -598,7 +616,7 @@ func evalAssign(node *ast.InfixExpression, env *object.Environment) object.Objec
 		}
 
 		// must be same type
-		if val.Type() == right.Type() {
+		if val.Type() == right.Type() || (val.Type() == object.NilType || right.Type() == object.NilType) {
 			v, ok := bottom.Assign(id, right)
 			if ok {
 				return v

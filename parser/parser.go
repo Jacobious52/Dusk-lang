@@ -83,6 +83,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.Nil, p.parseNilExpression)
 	p.registerPrefix(token.LParen, p.parseGroupedExpression)
 	p.registerPrefix(token.If, p.parseIfExpression)
+	p.registerPrefix(token.While, p.parseWhileExpression)
 	p.registerPrefix(token.Bar, p.parseFunctionLiteral)
 	p.registerPrefix(token.String, p.parseStringLiteral)
 	p.registerPrefix(token.LBracket, p.parseArrayLiteral)
@@ -340,6 +341,25 @@ func (p *Parser) parseIfExpression() ast.Expression {
 		// goto { or none and parse block
 		expr.Else = p.parseBlockStatement()
 	}
+
+	return expr
+}
+
+func (p *Parser) parseWhileExpression() ast.Expression {
+	expr := &ast.WhileExpression{Token: p.current}
+
+	p.nextToken()
+	expr.Cond = p.parseExpression(lowest)
+
+	// check if with mult statement or single statement
+	if !(p.nextIs(token.LBrace) || p.nextIs(token.Continue)) {
+		p.newError(fmt.Sprintf("expected '{' or ':' following while statement, got '%s' instead", p.next))
+		return nil
+	}
+
+	// goto the { or : and begin the block statment
+	p.nextToken()
+	expr.Do = p.parseBlockStatement()
 
 	return expr
 }
