@@ -223,3 +223,9 @@ Ball, Thorsten. “Writing An Interpreter In Go.” 2016.
 
 My main guide for designing the internal interpreters structure. Used his tests for checking correctness.
 It's a great book that I suggest if you want to write a programming language with more advanced features then most online literture. However always right the code yourself and change it so it fits with your idea of the program, adding and removing elements
+
+https://en.wikipedia.org/wiki/Lexical_analysis
+
+For reading about semicolon insertion
+
+https://en.wikipedia.org/wiki/String_interpolation
