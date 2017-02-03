@@ -1,0 +1,78 @@
+'scopeName': 'source.dusk'
+'name': 'Dusk'
+'fileTypes': ['dusk']
+
+'patterns': [
+    {
+    'match': '\\b(([0-9]+\\.?[0-9]*)|(\\.[0-9]+))\\b'
+    'name': 'constant.numeric.dusk'
+    },
+    {
+    'match': '\\b(let)\\s+(\\w+)\\s*='
+    'captures':
+        '1':
+            'name': 'keyword.control.dusk'
+        '2':
+            'name': 'variable.other.dusk'
+    'name': 'meta.function.dusk'
+    },
+    {
+        'match': 'if'
+        'name': 'keyword.control.dusk'
+    },
+    {
+        'match': 'else'
+        'name': 'keyword.control.dusk'
+    },
+    {
+        'match': 'while'
+        'name': 'keyword.control.dusk'
+    },
+    {
+        'match': 'for'
+        'name': 'keyword.control.dusk'
+    },
+    {
+        'match': 'true'
+        'name': 'constant.language.dusk'
+    },
+    {
+        'match': 'false'
+        'name': 'constant.language.dusk'
+    },
+    {
+        'match': 'nil'
+        'name': 'constant.language.dusk'
+    },
+    {
+        'match': 'ret'
+        'name': 'keyword.control.dusk'
+    },
+    {
+    'match': '([a-zA-Z0-9]+)\\s*(\\(|!)'
+    'captures':
+        '1':
+            'name': 'entity.name.function.dusk'
+    'name': 'meta.function.dusk'
+    }
+    {
+    'begin': '\''
+    'end': '\''
+    'name': 'string.quoted.single.dusk'
+    },
+    {
+    'begin': '\"'
+    'end': '\"'
+    'name': 'string.quoted.double.dusk'
+    },
+    {
+    'begin': '//'
+    'end': '\\n'
+    'name': 'comment.line.double-slash.dusk'
+    },
+    {
+    'begin': '\\|'
+    'end': '\\|'
+    'name': 'entity.name.tag.dusk'
+    }
+]

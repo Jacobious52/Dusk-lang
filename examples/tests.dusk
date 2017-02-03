@@ -10,6 +10,15 @@ let printThings = |things| {
     }
 }
 
+// woo whoo
 printThings(things)
 
 println("[alternately]", join(things, '\n'))
+
+println("[alternately]")
+
+let i = 0
+while i < len(things) {
+    println(things[i])
+    i += 1
+}

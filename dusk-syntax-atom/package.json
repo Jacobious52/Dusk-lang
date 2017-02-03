@@ -1,0 +1,14 @@
+{
+  "name": "dusk--syntax",
+  "main": "./lib/dusk--syntax",
+  "version": "0.0.0",
+  "description": "Syntax hilighting for dusk-lang",
+  "keywords": [],
+  "repository": "https://github.com/atom/dusk--syntax",
+  "license": "MIT",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  },
+  "dependencies": {
+  }
+}

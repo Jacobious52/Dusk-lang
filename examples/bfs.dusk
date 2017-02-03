@@ -1,0 +1,66 @@
+
+let map = alloc(10, alloc(10, 'X'))
+
+let printMap = || {
+    let i = 0
+    while i < len(map) {
+        println(map[i])
+        i += 1
+    }
+    ret nil
+}
+
+let in = |a, x| {
+    let i = 0
+    while i < len(a) {
+        if a[i] == x: ret true
+        i += 1
+    }
+    ret false
+}
+
+
+let adj = [[0,-1],[-1, 0], [1,0], [0,1]]
+
+let bfs = |start, end| {
+    let fringe = [start]
+    let visited = []
+
+    while len(fringe) > 0 {
+        let current = pop(fringe)
+        if !in(visited, current): push(visited, current)
+
+        if current == end {
+            ret "found"
+        }
+
+        let i = 0
+        while i < len(adj) {
+            let x = current[0]+adj[i][0]
+            let y = current[1]+adj[i][1]
+
+            if x > -1 {
+                if x < len(a) {
+                    if y > -1 {
+                        if y < len(a[0]) {
+                            let next = [x, y]
+                            if !in(visited, next) {
+                                fringe = push(fringe, next)
+                            }
+                        }
+                    }
+                }
+            }
+
+            i += 1
+        }
+    }
+
+    ret "not found"
+}
+
+printMap!
+
+let res = bfs([0,0], [8,7])
+
+println(res)
