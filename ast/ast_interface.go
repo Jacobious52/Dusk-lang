@@ -343,7 +343,7 @@ func (n *NilLiteral) String() string {
 
 // String for StringLiteral
 func (s *StringLiteral) String() string {
-	return s.Token.String()
+	return "\"" + s.Token.Literal + "\""
 }
 
 // Statement is the basis for a statment in the ast
