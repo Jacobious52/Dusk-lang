@@ -3,6 +3,10 @@ Dusk Language interpreter
 
 Dusk is a small project I've been working on in my spare time. For the purposes of learning to design/lex/parse/evaluate a programming language that's a little more than a 'toy language'
 
+### Builds
+
+[![Build Status](https://travis-ci.org/travis-ci/travis-web.svg?branch=master)](https://travis-ci.org/travis-ci/travis-web)
+
 [See here for pre-built releases](https://github.com/Jacobious52/Dusk-lang/releases)
 
 ### So far Dusk features are:
