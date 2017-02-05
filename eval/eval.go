@@ -395,6 +395,10 @@ func evalArrayInfixExpr(op token.Token, left, right object.Object) object.Object
 	case token.Plus:
 		return &object.Array{Elements: append(leftVals, rightVals...)}
 	case token.Equal:
+		if len(leftVals) != len(rightVals) {
+			return ConstFalse
+		}
+
 		for i := range leftVals {
 			if evalInfixExpr(op, leftVals[i], rightVals[i]) == ConstFalse {
 				return ConstFalse
@@ -402,6 +406,10 @@ func evalArrayInfixExpr(op token.Token, left, right object.Object) object.Object
 		}
 		return ConstTrue
 	case token.NotEqual:
+		if len(leftVals) != len(rightVals) {
+			return ConstTrue
+		}
+
 		for i := range leftVals {
 			if evalInfixExpr(op, leftVals[i], rightVals[i]) == ConstFalse {
 				return ConstTrue

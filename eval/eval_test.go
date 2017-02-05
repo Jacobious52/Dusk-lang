@@ -256,6 +256,22 @@ func TestEvalBooleanExpression(t *testing.T) {
 		{"(1 < 2) == false", false},
 		{"(1 > 2) == true", false},
 		{"(1 > 2) == false", true},
+		{"'hello' == 'hello'", true},
+		{"'hello' != 'hello'", true},
+		{"'hell' == 'hello'", false},
+		{"[1,2] == 'hello'", false},
+		{"[1,2] == [1,2]", true},
+		{"[1,3] == [1,2]", false},
+		{"[] == []", true},
+		{"[1] == []", false},
+		{"[1,1] == [1,1,1]", false},
+		{"[1,1,1] == [1,1,1]", true},
+		{"[1,2] == ['hello',2]", false},
+		{"2 == nil", false},
+		{"0 == nil", false},
+		{"nil == nil", true},
+		{"false == nil", false},
+		{"true == nil", false},
 	}
 
 	for _, tt := range tests {

@@ -1,0 +1,35 @@
+
+// make some nums to sum
+let nums = [1,2,3,4,5,6,7,8,9,10]
+
+// define a recursive iterative sum function
+let sum = |nums| {
+    let sumIter = |nums, s| {
+ 		if first(nums) == nil: s
+ 		else sumIter(rest(nums), first(nums)+s)
+    }
+    ret sumIter(nums, 0)
+}
+
+let resultA = sum(nums)
+
+// redefine sum to use a while loop
+let sum = |nums| {
+    let sum = 0
+    let i = 0
+
+    while i < len(nums) {
+        sum += nums[i]
+        i += 1
+    }
+
+    ret sum
+}
+
+let resultB = sum(nums)
+
+if resultA == resultB {
+    println("passed!", resultA, resultB)
+} else {
+    println("failed1", resultA, resultB)
+}
