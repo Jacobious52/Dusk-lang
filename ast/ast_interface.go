@@ -133,7 +133,7 @@ func (p *Program) String() string {
 func (l *LetStatement) String() string {
 	var b bytes.Buffer
 
-	b.WriteString(l.TokenLiteral())
+	b.WriteString("var")
 	b.WriteByte(' ')
 	b.WriteString(l.Name.String())
 	b.WriteString(" = ")
@@ -191,7 +191,7 @@ func (i *IndexExpression) String() string {
 func (r *ReturnStatement) String() string {
 	var b bytes.Buffer
 
-	b.WriteString(r.TokenLiteral())
+	b.WriteString("return")
 	b.WriteByte(' ')
 
 	if r.Value != nil {
@@ -241,9 +241,9 @@ func (f *FunctionLiteral) String() string {
 		params = append(params, p.String())
 	}
 
-	b.WriteString(f.TokenLiteral())
+	b.WriteString("function(")
 	b.WriteString(strings.Join(params, ", "))
-	b.WriteString(f.TokenLiteral())
+	b.WriteString(")")
 	b.WriteByte(' ')
 	b.WriteString(f.Body.String())
 
@@ -315,7 +315,7 @@ func (i *AccessIdentifier) String() string {
 // String for ExpressionStatement
 func (e *ExpressionStatement) String() string {
 	if e.Expression != nil {
-		return e.Expression.String()
+		return e.Expression.String() + ";"
 	}
 
 	return ""
@@ -343,7 +343,7 @@ func (n *NilLiteral) String() string {
 
 // String for StringLiteral
 func (s *StringLiteral) String() string {
-	return s.Token.String()
+	return "\"" + s.Token.Literal + "\""
 }
 
 // Statement is the basis for a statment in the ast

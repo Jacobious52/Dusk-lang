@@ -1,0 +1,3 @@
+let message = "hello, world"
+let doalert = |msg| alert(msg)
+doalert!
