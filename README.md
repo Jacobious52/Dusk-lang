@@ -3,11 +3,13 @@ Dusk Language interpreter
 
 Dusk is a small project I've been working on in my spare time. For the purposes of learning to design/lex/parse/evaluate a programming language that's a little more than a 'toy language'
 
-### Builds
+### JS-Compile branch
 
-[![Build Status](https://travis-ci.org/travis-ci/travis-web.svg?branch=master)](https://travis-ci.org/travis-ci/travis-web)
+This branch is experiental and is only a quick modification of the Dusk ast output to fit javascript.
+Should not be merged into master! Tests fail because the ast output does not match
 
-[See here for pre-built releases](https://github.com/Jacobious52/Dusk-lang/releases)
+Compile js with `dusk --js example/js-hello.dusk`
+
 
 ### So far Dusk features are:
 
