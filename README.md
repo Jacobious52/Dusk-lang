@@ -232,6 +232,7 @@ p2.sayhi!          // prints "hello, kyle"
 - `./dust` to start repl
 - `./dust file.dusk` to just run file
 
+jS-compile branch. Has an ast emit that compiles to javacript. Experimental only (no pull). See branch readme for more details
 
 #### reference:
 Ball, Thorsten. “Writing An Interpreter In Go.” 2016.
