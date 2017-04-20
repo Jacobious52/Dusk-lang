@@ -216,7 +216,7 @@ func evalIfExpr(node *ast.IfExpression, env *object.Environment) object.Object {
 }
 
 func evalWhileExpr(node *ast.WhileExpression, env *object.Environment) object.Object {
-	var lastEval object.Object = ConstNil
+	//var lastEval object.Object = ConstNil
 
 	for {
 		cond := Eval(node.Cond, env)
@@ -224,11 +224,19 @@ func evalWhileExpr(node *ast.WhileExpression, env *object.Environment) object.Ob
 			return cond
 		}
 
+		// while should return nothing
 		if !isTruthy(cond) {
-			return lastEval
+			return nil
 		}
 
-		lastEval = Eval(node.Do, env)
+		Eval(node.Do, env)
+
+		if node.Then != nil {
+			then := Eval(node.Then, env)
+			if isError(then) {
+				return then
+			}
+		}
 	}
 }
 

@@ -351,9 +351,15 @@ func (p *Parser) parseWhileExpression() ast.Expression {
 	p.nextToken()
 	expr.Cond = p.parseExpression(lowest)
 
+	if p.nextIs(token.Comma) {
+		p.nextToken()
+		p.nextToken()
+		expr.Then = p.parseExpression(lowest)
+	}
+
 	// check if with mult statement or single statement
 	if !(p.nextIs(token.LBrace) || p.nextIs(token.Continue)) {
-		p.newError(fmt.Sprintf("expected '{' or ':' following while statement, got '%s' instead", p.next))
+		p.newError(fmt.Sprintf("expected '{' or ':' following while statement, got %s '%s' instead", p.next, p.next.Literal))
 		return nil
 	}
 

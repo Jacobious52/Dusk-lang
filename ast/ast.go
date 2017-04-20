@@ -38,6 +38,7 @@ type IfExpression struct {
 type WhileExpression struct {
 	Token token.Token // token.While
 	Cond  Expression
+	Then  Expression
 	Do    *BlockStatement
 }
 
