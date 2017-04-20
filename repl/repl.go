@@ -62,6 +62,29 @@ func Run(in io.Reader, out io.Writer) bool {
 		case ":c":
 			fmt.Fprint(out, intro)
 			continue
+		case "use iter":
+			iter := `let iter = |a| {
+			    let index = 0
+			    let array = a
+			    let item = nil
+
+			    let next = || {
+			        ret if index < len(array) {
+			            item = array[index]
+			            index += 1
+			            ret item
+			        }
+			    }
+
+			    ret || iter
+			}`
+
+			l := lexer.WithString(iter, "iter")
+			p := parser.New(l)
+			program := p.ParseProgram()
+			eval.Eval(program, env)
+
+			continue
 		}
 
 		var b bytes.Buffer

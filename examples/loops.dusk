@@ -1,0 +1,30 @@
+
+println("while loop inc")
+let i = 0
+while i < 10, i += 1: println(i)
+
+println("while loop iter")
+
+let iter = |a| {
+    let index = 0
+    let array = a
+    let item = a[0]
+
+    let next = || {
+        ret if index < len(array) {
+            item = array[index]
+            index+=1
+            ret item
+        }
+    }
+
+    ret || iter
+}
+
+
+let a = ['a', 'b', 'c']
+
+let it = iter(a)
+while it.next() {
+    println(it.item)
+}
