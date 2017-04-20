@@ -30,6 +30,8 @@ var builtins = map[string]*object.Builtin{
 	"readall": &object.Builtin{Fn: readall},
 	"atoi":    &object.Builtin{Fn: atoi},
 	"itoa":    &object.Builtin{Fn: itoa},
+	"in":      &object.Builtin{Fn: in},
+	"out":     &object.Builtin{Fn: out},
 }
 
 func length(args ...object.Object) object.Object {
@@ -331,6 +333,49 @@ func readall(args ...object.Object) object.Object {
 	s, _ := ioutil.ReadAll(os.Stdin)
 
 	return &object.String{Value: string(s)}
+}
+
+func in(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError(token.Position{}, "in takes one arguments. given '%d'", len(args))
+	}
+
+	switch arg := args[0].(type) {
+	case *object.String:
+		f, err := os.Open(arg.Value)
+		if err != nil {
+			return newError(token.Position{}, err.Error())
+		}
+		defer f.Close()
+		s, _ := ioutil.ReadAll(f)
+		return &object.String{Value: string(s)}
+	default:
+		return newError(token.Position{}, "argument to 'in' not supported, got '%s'", args[0].Type())
+	}
+}
+
+func out(args ...object.Object) object.Object {
+	if len(args) != 2 {
+		return newError(token.Position{}, "out takes one arguments. given '%d'", len(args))
+	}
+
+	switch arg := args[0].(type) {
+	case *object.String:
+		f, err := os.Create(arg.Value)
+		if err != nil {
+			return newError(token.Position{}, err.Error())
+		}
+		defer f.Close()
+		switch str := args[1].(type) {
+		case *object.String:
+			f.WriteString(str.Value)
+			return nil
+		default:
+			return newError(token.Position{}, "argument to 'out' not supported, got '%s'", args[0].Type())
+		}
+	default:
+		return newError(token.Position{}, "argument to 'out' not supported, got '%s'", args[0].Type())
+	}
 }
 
 func atoi(args ...object.Object) object.Object {
