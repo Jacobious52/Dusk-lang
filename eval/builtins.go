@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"jacob/dusk/object"
 	"jacob/dusk/token"
+	"math/rand"
 	"os"
 	"strings"
 )
@@ -32,6 +33,36 @@ var builtins = map[string]*object.Builtin{
 	"itoa":    &object.Builtin{Fn: itoa},
 	"in":      &object.Builtin{Fn: in},
 	"out":     &object.Builtin{Fn: out},
+	"rand":    &object.Builtin{Fn: random},
+}
+
+func random(args ...object.Object) object.Object {
+	if len(args) == 0 {
+		return &object.Float{Value: rand.Float64()}
+	} else if len(args) == 2 {
+		switch min := args[0].(type) {
+		case *object.Integer:
+			switch max := args[1].(type) {
+			case *object.Integer:
+				return &object.Integer{Value: rand.Int63n(max.Value-min.Value) + min.Value}
+			default:
+				return newError(token.Position{}, "wrong arg types")
+			}
+		default:
+			return newError(token.Position{}, "wrong arg types")
+		}
+	} else {
+		return newError(token.Position{}, "wrong number of arguments. got '%d', expected '0 or 2'", len(args))
+	}
+
+	switch arg := args[0].(type) {
+	case *object.String:
+		return &object.Integer{Value: int64(len(arg.Value))}
+	case *object.Array:
+		return &object.Integer{Value: int64(len(arg.Elements))}
+	default:
+		return newError(token.Position{}, "argument to 'len' not supported, got '%s'", args[0].Type())
+	}
 }
 
 func length(args ...object.Object) object.Object {

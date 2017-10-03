@@ -9,7 +9,9 @@ import (
 	"jacob/dusk/lexer"
 	"jacob/dusk/object"
 	"jacob/dusk/parser"
+	"math/rand"
 	"strings"
+	"time"
 )
 
 const (
@@ -35,6 +37,8 @@ func color(v interface{}, color colorCode) string {
 
 // Run starts the repl to read and run a line at a time
 func Run(in io.Reader, out io.Writer) bool {
+
+	rand.Seed(time.Now().UTC().UnixNano())
 
 	fmt.Fprint(out, intro)
 
