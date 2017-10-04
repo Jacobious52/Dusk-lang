@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"os"
 	"strings"
+	"time"
 )
 
 var builtins = map[string]*object.Builtin{
@@ -34,6 +35,21 @@ var builtins = map[string]*object.Builtin{
 	"in":      &object.Builtin{Fn: in},
 	"out":     &object.Builtin{Fn: out},
 	"rand":    &object.Builtin{Fn: random},
+	"sleep":   &object.Builtin{Fn: sleep},
+}
+
+func sleep(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError(token.Position{}, "wrong number of arguments. got '%d', expected '1'", len(args))
+	}
+
+	switch t := args[0].(type) {
+	case *object.Integer:
+		time.Sleep(time.Duration(t.Value) * time.Millisecond)
+		return ConstNil
+	default:
+		return newError(token.Position{}, "wrong arg types")
+	}
 }
 
 func random(args ...object.Object) object.Object {
@@ -53,15 +69,6 @@ func random(args ...object.Object) object.Object {
 		}
 	} else {
 		return newError(token.Position{}, "wrong number of arguments. got '%d', expected '0 or 2'", len(args))
-	}
-
-	switch arg := args[0].(type) {
-	case *object.String:
-		return &object.Integer{Value: int64(len(arg.Value))}
-	case *object.Array:
-		return &object.Integer{Value: int64(len(arg.Elements))}
-	default:
-		return newError(token.Position{}, "argument to 'len' not supported, got '%s'", args[0].Type())
 	}
 }
 
