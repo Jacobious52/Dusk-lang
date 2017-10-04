@@ -9,7 +9,9 @@ import (
 	"jacob/dusk/lexer"
 	"jacob/dusk/object"
 	"jacob/dusk/parser"
+	"log"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 )
@@ -88,6 +90,21 @@ func Run(in io.Reader, out io.Writer) bool {
 			program := p.ParseProgram()
 			eval.Eval(program, env)
 
+			continue
+		}
+
+		if strings.Contains(line, "use") {
+			fname := strings.Split(line, " ")[1]
+			file, err := os.Open(fname)
+			if err != nil {
+				log.Fatalln("Failed to read file", fname)
+				return false
+			}
+			l := lexer.WithReader(file, fname)
+			p := parser.New(l)
+			program := p.ParseProgram()
+			eval.Eval(program, env)
+			file.Close()
 			continue
 		}
 
