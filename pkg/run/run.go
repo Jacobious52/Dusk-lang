@@ -27,7 +27,7 @@ func Run(in io.Reader, out io.Writer, name string) {
 		return
 	}
 
-	result := eval.Eval(program, env)
+	result := eval.Eval(program, env, nil)
 
 	if result != nil && result.Type() != object.NilType {
 		fmt.Fprint(out, result)

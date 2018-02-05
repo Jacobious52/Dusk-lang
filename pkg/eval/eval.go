@@ -50,77 +50,82 @@ func bottomEnv(id *ast.AccessIdentifier, env *object.Environment) (*object.Envir
 }
 
 // Eval evaluates the program node and returns an object as a result
-func Eval(node ast.Node, env *object.Environment) object.Object {
-	switch node := node.(type) {
+func Eval(node ast.Node, env *object.Environment, stop <-chan struct{}) object.Object {
+	select {
+	case <-stop:
+		return ConstNil
+	default:
+	}
 
+	switch node := node.(type) {
 	// statements
 	case *ast.Program:
-		return evalProgram(node, env)
+		return evalProgram(node, env, stop)
 	case *ast.LetStatement:
-		val := Eval(node.Value, env)
+		val := Eval(node.Value, env, stop)
 		if isError(val) {
 			return val
 		}
 		env.Set(node.Name.Value, val)
 	case *ast.ReturnStatement:
-		val := Eval(node.Value, env)
+		val := Eval(node.Value, env, stop)
 		if isError(val) {
 			return val
 		}
 		return &object.ReturnValue{Value: val}
 	case *ast.BlockStatement:
-		return evalBlockStatement(node, env)
+		return evalBlockStatement(node, env, stop)
 	case *ast.ExpressionStatement:
-		return Eval(node.Expression, env)
+		return Eval(node.Expression, env, stop)
 
 		// expressions
 	case *ast.PrefixExpression:
-		right := Eval(node.Right, env)
+		right := Eval(node.Right, env, stop)
 		if isError(right) {
 			return right
 		}
 		return evalPrefixExpr(node.Token, right)
 	case *ast.InfixExpression:
 		if node.Operator == token.Assign {
-			return evalAssign(node, env)
+			return evalAssign(node, env, stop)
 		}
 
-		left := Eval(node.Left, env)
+		left := Eval(node.Left, env, stop)
 		if isError(left) {
 			return left
 		}
-		right := Eval(node.Right, env)
+		right := Eval(node.Right, env, stop)
 		if isError(right) {
 			return right
 		}
 		return evalInfixExpr(node.Token, left, right)
 	case *ast.IndexExpression:
-		left := Eval(node.Left, env)
+		left := Eval(node.Left, env, stop)
 		if isError(left) {
 			return left
 		}
 
-		index := Eval(node.Index, env)
+		index := Eval(node.Index, env, stop)
 		if isError(index) {
 			return index
 		}
 		return evalIndexExpr(node.Token, left, index)
 	case *ast.IfExpression:
-		return evalIfExpr(node, env)
+		return evalIfExpr(node, env, stop)
 	case *ast.WhileExpression:
-		return evalWhileExpr(node, env)
+		return evalWhileExpr(node, env, stop)
 	case *ast.CallExpression:
-		function := Eval(node.Func, env)
+		function := Eval(node.Func, env, stop)
 		if isError(function) {
 			return function
 		}
 
-		args, err := evalExpressions(node.Args, env)
+		args, err := evalExpressions(node.Args, env, stop)
 		if err != nil {
 			return err
 		}
 
-		return doFunction(node.Token, function, args)
+		return doFunction(node.Token, function, args, stop)
 
 		// literals
 	case *ast.IntegerLiteral:
@@ -136,7 +141,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.StringLiteral:
 		return &object.String{Value: node.Value}
 	case *ast.ArrayLiteral:
-		elems, err := evalExpressions(node.Elements, env)
+		elems, err := evalExpressions(node.Elements, env, stop)
 		if len(elems) == 1 && err != nil {
 			return err
 		}
@@ -149,11 +154,11 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	return nil
 }
 
-func evalProgram(program *ast.Program, env *object.Environment) object.Object {
+func evalProgram(program *ast.Program, env *object.Environment, stop <-chan struct{}) object.Object {
 	var result object.Object
 
 	for _, s := range program.Statements {
-		result = Eval(s, env)
+		result = Eval(s, env, stop)
 
 		if result != nil {
 			// pass up the return type to the top level
@@ -170,11 +175,11 @@ func evalProgram(program *ast.Program, env *object.Environment) object.Object {
 	return result
 }
 
-func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) object.Object {
+func evalBlockStatement(block *ast.BlockStatement, env *object.Environment, stop <-chan struct{}) object.Object {
 	var result object.Object
 
 	for _, s := range block.Statements {
-		result = Eval(s, env)
+		result = Eval(s, env, stop)
 
 		if result != nil {
 			if result.Type() == object.ReturnType || result.Type() == object.ErrorType {
@@ -186,11 +191,11 @@ func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) obje
 	return result
 }
 
-func evalExpressions(expressions []ast.Expression, env *object.Environment) ([]object.Object, object.Object) {
+func evalExpressions(expressions []ast.Expression, env *object.Environment, stop <-chan struct{}) ([]object.Object, object.Object) {
 	var evaluated []object.Object
 
 	for _, e := range expressions {
-		evaled := Eval(e, env)
+		evaled := Eval(e, env, stop)
 		if isError(evaled) {
 			return []object.Object{}, evaled
 		}
@@ -200,26 +205,26 @@ func evalExpressions(expressions []ast.Expression, env *object.Environment) ([]o
 	return evaluated, nil
 }
 
-func evalIfExpr(node *ast.IfExpression, env *object.Environment) object.Object {
-	cond := Eval(node.Cond, env)
+func evalIfExpr(node *ast.IfExpression, env *object.Environment, stop <-chan struct{}) object.Object {
+	cond := Eval(node.Cond, env, stop)
 	if isError(cond) {
 		return cond
 	}
 
 	if isTruthy(cond) {
-		return Eval(node.Do, env)
+		return Eval(node.Do, env, stop)
 	} else if node.Else != nil {
-		return Eval(node.Else, env)
+		return Eval(node.Else, env, stop)
 	}
 
 	return ConstNil
 }
 
-func evalWhileExpr(node *ast.WhileExpression, env *object.Environment) object.Object {
+func evalWhileExpr(node *ast.WhileExpression, env *object.Environment, stop <-chan struct{}) object.Object {
 	//var lastEval object.Object = ConstNil
 
 	for {
-		cond := Eval(node.Cond, env)
+		cond := Eval(node.Cond, env, stop)
 		if isError(cond) {
 			return cond
 		}
@@ -229,10 +234,15 @@ func evalWhileExpr(node *ast.WhileExpression, env *object.Environment) object.Ob
 			return nil
 		}
 
-		Eval(node.Do, env)
+		select {
+		case <-stop:
+			break
+		default:
+			Eval(node.Do, env, stop)
+		}
 
 		if node.Then != nil {
-			then := Eval(node.Then, env)
+			then := Eval(node.Then, env, stop)
 			if isError(then) {
 				return then
 			}
@@ -558,7 +568,7 @@ func evalAccessIdentifier(id *ast.AccessIdentifier, env *object.Environment) obj
 }
 
 // special case = assign operator
-func evalAssign(node *ast.InfixExpression, env *object.Environment) object.Object {
+func evalAssign(node *ast.InfixExpression, env *object.Environment, stop <-chan struct{}) object.Object {
 
 	var bottom *object.Environment
 	var id string
@@ -576,7 +586,7 @@ func evalAssign(node *ast.InfixExpression, env *object.Environment) object.Objec
 		id = last
 		bottom = b
 	case *ast.IndexExpression:
-		array := Eval(l.Left, env)
+		array := Eval(l.Left, env, stop)
 		if isError(array) {
 			return array
 		}
@@ -585,7 +595,7 @@ func evalAssign(node *ast.InfixExpression, env *object.Environment) object.Objec
 		}
 		a := array.(*object.Array)
 
-		index := Eval(l.Index, env)
+		index := Eval(l.Index, env, stop)
 		if isError(index) {
 			return index
 		}
@@ -603,7 +613,7 @@ func evalAssign(node *ast.InfixExpression, env *object.Environment) object.Objec
 			return newError(l.Token.Pos, "index '%d' out of bounds of array. Max '%d'", i, max)
 		}
 
-		right := Eval(node.Right, env)
+		right := Eval(node.Right, env, stop)
 		if isError(right) {
 			return right
 		}
@@ -626,7 +636,7 @@ func evalAssign(node *ast.InfixExpression, env *object.Environment) object.Objec
 		}
 
 		// eval rhs
-		right := Eval(node.Right, env)
+		right := Eval(node.Right, env, stop)
 		if isError(right) {
 			return right
 		}
@@ -645,7 +655,7 @@ func evalAssign(node *ast.InfixExpression, env *object.Environment) object.Objec
 	return newError(node.Token.Pos, "cannot assign value to variable '%s' that does not exist", id)
 }
 
-func doFunction(t token.Token, f object.Object, args []object.Object) object.Object {
+func doFunction(t token.Token, f object.Object, args []object.Object, stop <-chan struct{}) object.Object {
 
 	switch function := f.(type) {
 	case *object.Function:
@@ -654,7 +664,7 @@ func doFunction(t token.Token, f object.Object, args []object.Object) object.Obj
 		}
 
 		childEnv := adoptFunctionEnv(function, args)
-		evaluated := Eval(function.Body, childEnv)
+		evaluated := Eval(function.Body, childEnv, stop)
 
 		if val, ok := evaluated.(*object.ReturnValue); ok {
 			return val.Value
