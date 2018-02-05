@@ -27,6 +27,7 @@ func Run(in io.Reader, out io.Writer, name string, stop <-chan struct{}) {
 		return
 	}
 
+	eval.OutStream = out
 	result := eval.Eval(program, env, stop)
 
 	if result != nil && result.Type() != object.NilType {
