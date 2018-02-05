@@ -3,6 +3,7 @@ package eval
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"jacob/dusk/pkg/object"
 	"jacob/dusk/pkg/token"
@@ -13,7 +14,7 @@ import (
 )
 
 // OutStream out
-var OutStream = os.Stdout
+var OutStream io.Writer = os.Stdout
 
 var builtins = map[string]*object.Builtin{
 	"len":     &object.Builtin{Fn: length},
