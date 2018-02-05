@@ -3,10 +3,10 @@ package run
 import (
 	"fmt"
 	"io"
-	"jacob/dusk/eval"
-	"jacob/dusk/lexer"
-	"jacob/dusk/object"
-	"jacob/dusk/parser"
+	"jacob/dusk/pkg/eval"
+	"jacob/dusk/pkg/lexer"
+	"jacob/dusk/pkg/object"
+	"jacob/dusk/pkg/parser"
 )
 
 // Run starts the repl to read and run a line at a time

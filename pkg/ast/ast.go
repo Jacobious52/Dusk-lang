@@ -6,7 +6,7 @@
 
 package ast
 
-import "jacob/dusk/token"
+import "jacob/dusk/pkg/token"
 
 // Program ::= Statement*
 type Program struct {

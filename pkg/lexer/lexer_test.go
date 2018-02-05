@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"jacob/dusk/token"
+	"jacob/dusk/pkg/token"
 	"testing"
 )
 

@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"jacob/dusk/repl"
-	"jacob/dusk/run"
+	"jacob/dusk/pkg/repl"
+	"jacob/dusk/pkg/run"
 	"os"
 )
 

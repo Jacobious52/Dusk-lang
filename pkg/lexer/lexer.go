@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"jacob/dusk/token"
+	"jacob/dusk/pkg/token"
 	"strings"
 )
 
