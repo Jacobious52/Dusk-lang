@@ -3,8 +3,8 @@ package object
 import (
 	"bytes"
 	"fmt"
-	"jacob/dusk/ast"
-	"jacob/dusk/token"
+	"jacob/dusk/pkg/ast"
+	"jacob/dusk/pkg/token"
 	"strings"
 )
 

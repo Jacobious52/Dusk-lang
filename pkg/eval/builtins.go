@@ -3,14 +3,18 @@ package eval
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"io/ioutil"
-	"jacob/dusk/object"
-	"jacob/dusk/token"
+	"jacob/dusk/pkg/object"
+	"jacob/dusk/pkg/token"
 	"math/rand"
 	"os"
 	"strings"
 	"time"
 )
+
+// OutStream out
+var OutStream io.Writer = os.Stdout
 
 var builtins = map[string]*object.Builtin{
 	"len":     &object.Builtin{Fn: length},
@@ -315,14 +319,14 @@ func split(args ...object.Object) object.Object {
 
 func println(args ...object.Object) object.Object {
 	for _, arg := range args {
-		fmt.Println(arg)
+		fmt.Fprintln(OutStream, arg)
 	}
 	return ConstNil
 }
 
 func print(args ...object.Object) object.Object {
 	for _, arg := range args {
-		fmt.Print(arg)
+		fmt.Fprintln(OutStream, arg)
 	}
 	return ConstNil
 }

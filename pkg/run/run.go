@@ -3,14 +3,14 @@ package run
 import (
 	"fmt"
 	"io"
-	"jacob/dusk/eval"
-	"jacob/dusk/lexer"
-	"jacob/dusk/object"
-	"jacob/dusk/parser"
+	"jacob/dusk/pkg/eval"
+	"jacob/dusk/pkg/lexer"
+	"jacob/dusk/pkg/object"
+	"jacob/dusk/pkg/parser"
 )
 
 // Run starts the repl to read and run a line at a time
-func Run(in io.Reader, out io.Writer, name string) {
+func Run(in io.Reader, out io.Writer, name string, stop <-chan struct{}) {
 	env := object.NewEnvironment()
 
 	l := lexer.WithReader(in, name)
@@ -27,7 +27,8 @@ func Run(in io.Reader, out io.Writer, name string) {
 		return
 	}
 
-	result := eval.Eval(program, env)
+	eval.OutStream = out
+	result := eval.Eval(program, env, stop)
 
 	if result != nil && result.Type() != object.NilType {
 		fmt.Fprint(out, result)

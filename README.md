@@ -227,7 +227,7 @@ p2.sayhi!          // prints "hello, kyle"
 ```
 
 ## Building source
-- Place contents in `$GOPATH/src/jacob/dusk`
+- Place contents in `$GOPATH/src/jacob/dusk/pkg`
 - `go build`
 - `./dust` to start repl
 - `./dust file.dusk` to just run file

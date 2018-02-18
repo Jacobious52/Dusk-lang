@@ -5,10 +5,10 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"jacob/dusk/eval"
-	"jacob/dusk/lexer"
-	"jacob/dusk/object"
-	"jacob/dusk/parser"
+	"jacob/dusk/pkg/eval"
+	"jacob/dusk/pkg/lexer"
+	"jacob/dusk/pkg/object"
+	"jacob/dusk/pkg/parser"
 	"log"
 	"math/rand"
 	"os"
@@ -88,7 +88,7 @@ func Run(in io.Reader, out io.Writer) bool {
 			l := lexer.WithString(iter, "iter")
 			p := parser.New(l)
 			program := p.ParseProgram()
-			eval.Eval(program, env)
+			eval.Eval(program, env, nil)
 
 			continue
 		}
@@ -103,7 +103,7 @@ func Run(in io.Reader, out io.Writer) bool {
 			l := lexer.WithReader(file, fname)
 			p := parser.New(l)
 			program := p.ParseProgram()
-			eval.Eval(program, env)
+			eval.Eval(program, env, nil)
 			file.Close()
 			continue
 		}
@@ -159,7 +159,7 @@ func Run(in io.Reader, out io.Writer) bool {
 			continue
 		}
 
-		result := eval.Eval(program, env)
+		result := eval.Eval(program, env, nil)
 
 		if result != nil && result.Type() != object.NilType {
 			fmt.Fprintln(out, "", color(prompt, magneta), "\t", color(strings.Replace(result.String(), "\n", fmt.Sprint("\n ", color(prompt, magneta), " \t "), -1), yellow))
